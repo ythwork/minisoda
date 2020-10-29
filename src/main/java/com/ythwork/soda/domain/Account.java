@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +32,7 @@ public class Account {
 	private Member member;
 	
 	// 테이블 구성 시 ON DELETE CASCADE 명시
-	@ManyToOne(fetch=FetchType.LAZY)
+	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "openapi_id")
 	private Openapi openapi;
 	
