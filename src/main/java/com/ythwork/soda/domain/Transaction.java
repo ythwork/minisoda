@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -65,5 +66,21 @@ public class Transaction {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date processAt;
 	
+	public Transaction() {
+		// 거래가 시작되었다.
+		this.transactionStatus = TransactionStatus.IN_PROCESS;
+	}
 	
+	public void setMember(Member member) {
+		this.member = member;
+		if(!member.getTransactions().contains(this)) {
+			member.getTransactions().add(this);
+		}
+	}
+	
+	// 거래 내역이 저장되기 전에 processAt을 생성한다.
+	@PrePersist
+	void processAt() {
+		this.processAt = new Date();
+	}
 }

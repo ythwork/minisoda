@@ -28,12 +28,13 @@ CREATE TABLE openapi (
 		balance BIGINT UNSIGNED NOT NULL, 
 		CONSTRAINT fk_code_bankcode 
 			FOREIGN KEY (bankcode_id) REFERENCES bankcode(bankcode_id));
-
+ALTER TABLE openapi
+		ADD INDEX ix_bankcode_acnt_num (bankcode_id, account_number);
 
 CREATE TABLE account (
     	account_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     	member_id INT NOT NULL,
-    	openapi_id INT NOT NULL,
+    	openapi_id INT NOT NULL UNIQUE,
     	CONSTRAINT fk_mid_member 
 			FOREIGN KEY (member_id) REFERENCES member(member_id) ON DELETE CASCADE,
     	CONSTRAINT fk_oid_openapi 

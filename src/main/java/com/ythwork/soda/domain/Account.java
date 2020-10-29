@@ -32,8 +32,15 @@ public class Account {
 	private Member member;
 	
 	// 테이블 구성 시 ON DELETE CASCADE 명시
+	// 일대일 관계이므로 데이터베이스에 UNIQUE 제약 조건을 걸어두었다.
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "openapi_id")
 	private Openapi openapi;
 	
+	public void setMember(Member member) {
+		this.member = member;
+		if(!member.getAccounts().contains(this)) {
+			member.getAccounts().add(this);
+		}
+	}
 }

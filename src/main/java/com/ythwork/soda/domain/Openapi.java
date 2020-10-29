@@ -23,6 +23,8 @@ public class Openapi {
 	@Column(name = "openapi_id")
 	private Long id;
 	
+	// 검색 성능을 높이기 위해 (bankcode, accountNumber)에 대해 인덱스를 만들었다.
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	// JoinColumn은 외래키를 의미
 	@JoinColumn(name = "bankcode_id")
@@ -42,5 +44,9 @@ public class Openapi {
 	// 다만 현실적으로 잔액이 Long의 상한을 넘기는 일은 일어나지 않을 것이므로 Long 타입을 사용한다.  
 	private Long balance;
 	
+	public void setBankcode(Bankcode bankcode) {
+		this.bankcode = bankcode;
+		bankcode.getOpenapis().add(this);
+	}
 	
 }
