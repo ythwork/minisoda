@@ -50,8 +50,11 @@ CREATE TABLE transaction (
 		transaction_status VARCHAR(10) NOT NULL, 
 		process_at TIMESTAMP NOT NULL,  
 		CONSTRAINT fk_member_id_member 
-			FOREIGN KEY (member_id) REFERENCES member(member_id), 
+			FOREIGN KEY (member_id) REFERENCES member(member_id) ON DELETE CASCADE, 
 		CONSTRAINT fk_send_openapi 
 			FOREIGN KEY (send_account) REFERENCES openapi(openapi_id), 
 		CONSTRAINT fk_recv_openapi 
 		FOREIGN KEY (recv_account) REFERENCES openapi(openapi_id));
+
+ALTER TABLE transaction
+	ADD INDEX ix_process_at(process_at);

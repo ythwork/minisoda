@@ -28,6 +28,9 @@ public class Openapi {
 	@JoinColumn(name = "bankcode_id")
 	private Bankcode bankcode;
 	
+	// openapi는 애플리케이션이 담당하는 데이터베이스가 아니라 REST 서비스로 
+	// 받아오는 데이터를 모델링하므로 연관 관계 매핑을 하지 않는다. 
+	
 	@Column(name = "account_number")
 	private String accountNumber;
 	
