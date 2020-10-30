@@ -6,5 +6,5 @@ import com.ythwork.soda.domain.Account;
 import com.ythwork.soda.domain.Openapi;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-	Openapi findByOpenapi(Openapi api);
+	Account findByOpenapi(Openapi api);
 }
