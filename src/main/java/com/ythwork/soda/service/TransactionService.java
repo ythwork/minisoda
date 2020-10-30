@@ -9,14 +9,12 @@ import static org.springframework.data.jpa.domain.Specification.where;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ythwork.soda.data.TransactionRepository;
-import com.ythwork.soda.domain.Account;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
@@ -64,20 +62,8 @@ public class TransactionService {
 		Date from = filter.getFrom();
 		Date to = filter.getTo();
 		TransactionStatus status = filter.getStatus();
-		
-		Member member = null;
-		Optional<Member> optMember = memberRepo.findById(memberId);
-		if(optMember.isPresent()) {
-			member = optMember.get();
-		}
-		
-		Openapi send = null;
-		Optional<Account> optAccount = accountRepo.findById(sendAcntId);
-		if(optAccount.isPresent()) {
-			Account account = optAccount.get();
-			send = account.getOpenapi();
-		}
-		
+		Member member = memberService.findById(memberId);
+		Openapi send = accountService.findOpenapiByAccountId(sendAcntId);
 		Long amount = filter.getAmount();
 		
 		return transactionRepo.findAll(where(memberIs(member)
