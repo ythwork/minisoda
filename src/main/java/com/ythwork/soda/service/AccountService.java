@@ -7,11 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ythwork.soda.data.AccountRepository;
-import com.ythwork.soda.data.BankcodeRepository;
 import com.ythwork.soda.data.MemberRepository;
-import com.ythwork.soda.data.OpenapiRepository;
 import com.ythwork.soda.domain.Account;
-import com.ythwork.soda.domain.Bankcode;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.dto.AccountInfo;
@@ -26,14 +23,12 @@ public class AccountService {
 	@Autowired
 	private AccountRepository accountRepo;
 	@Autowired
-	private OpenapiRepository openapiRepo;
-	@Autowired
-	private BankcodeRepository bankcodeRepo;
+	private OpenapiService openapiService;
 	
 	// 서비스에 이용할 계좌를 추가한다.
 	// 성공하면 등록한 계좌 정보를 반환한다.
 	public Long addAccountToBoard(Long memberId, String bankcode, String accountNumber) {
-		Openapi api = findOpenapi(bankcode, accountNumber);
+		Openapi api = openapiService.findOpenapi(bankcode, accountNumber);
 		if(api == null) {
 			throw new EntityNotFound("계좌번호 : " + accountNumber + "는 존재하지 않습니다.");
 		}
@@ -58,31 +53,25 @@ public class AccountService {
 		return account.getId();
 	}
 	
+	public Openapi findOpenapiByAccountId(Long accountId) {
+		Optional<Account> optAccount = accountRepo.findById(accountId);
+		if(optAccount.isPresent()) {
+			return optAccount.get().getOpenapi();
+		} else {
+			throw new EntityNotFound("계좌 정보를 찾지 못했습니다.");
+		}
+	}
+	
 	private boolean alreadyAccount(Account account) {
 		Account a = accountRepo.findByOpenapi(account.getOpenapi());
 		return a != null ? true : false;
-	}
-	
-	// 통합 은행 api 서비스에서 계좌 정보를 가져온다.
-	private Openapi findOpenapi(String code, String accountNumber) {
-		Bankcode bankcode = bankcodeRepo.findByCode(code);
-		if(bankcode == null) {
-			throw new EntityNotFound("은행 코드 : " + code + "는 존재하지 않습니다.");
-		}
-		return openapiRepo.findByBankcodeAndAccountNumber(bankcode, accountNumber);
 	}
 	
 	// 다른 채널을 통해 계좌로 금융 거래를 했을지도 모르므로
 	// 대시보드를 보여주기 전에 항상 업데이트를 해야 한다.
 	public Long updateAccount(Account account) {
 		Openapi oldOpenapi = account.getOpenapi();
-		Optional<Openapi> optOpenapi = openapiRepo.findById(oldOpenapi.getId());
-		Openapi api = null;
-		if(optOpenapi.isPresent()) {
-			api = optOpenapi.get();
-		} else {
-			throw new EntityNotFound("계좌번호 : " + oldOpenapi.getAccountNumber() + "는 존재하지 않습니다.");
-		}
+		Openapi api = openapiService.findById(oldOpenapi.getId());
 		account.setOpenapi(api);
 		accountRepo.save(account);
 		

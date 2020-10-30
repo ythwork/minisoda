@@ -43,11 +43,11 @@ public class TransactionSpec {
 		};
 	}
 	
-	public static Specification<Transaction> amountGt(Long amount) {
+	public static Specification<Transaction> amountGtOrEt(Long amount) {
 		return (transaction, cq, cb) -> {
 			if(amount == null) return null;
 			
-			return cb.greaterThan(transaction.get("amount"), amount);
+			return cb.greaterThanOrEqualTo(transaction.get("amount"), amount);
 		};
 	}
 }

@@ -1,5 +1,7 @@
 package com.ythwork.soda.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ythwork.soda.data.MemberRepository;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
+import com.ythwork.soda.exception.EntityNotFound;
 
 @Service
 @Transactional
@@ -32,6 +35,15 @@ public class MemberService {
 	// 회원 탈퇴
 	public void quit(Member member) {
 		memberRepo.delete(member);
+	}
+	
+	public Member findById(Long id) {
+		Optional<Member> optMember = memberRepo.findById(id);
+		if(optMember.isPresent()) {
+			return optMember.get();
+		} else {
+			throw new EntityNotFound("멤버를 찾을 수 없습니다.");
+		}
 	}
 	
 	
