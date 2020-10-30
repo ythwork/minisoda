@@ -50,4 +50,5 @@ public class Member {
 	
 	@OneToMany(mappedBy = "member", fetch=FetchType.LAZY)
 	private List<Transaction> transactions = new ArrayList<>();
+	
 }
