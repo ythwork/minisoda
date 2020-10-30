@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ythwork.soda.data.AccountRepository;
-import com.ythwork.soda.data.MemberRepository;
 import com.ythwork.soda.domain.Account;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.domain.Openapi;
@@ -19,7 +18,7 @@ import com.ythwork.soda.exception.EntityNotFound;
 @Transactional
 public class AccountService {
 	@Autowired
-	private MemberRepository memberRepo;
+	private MemberService memberService;
 	@Autowired
 	private AccountRepository accountRepo;
 	@Autowired
@@ -29,16 +28,7 @@ public class AccountService {
 	// 성공하면 등록한 계좌 정보를 반환한다.
 	public Long addAccountToBoard(Long memberId, String bankcode, String accountNumber) {
 		Openapi api = openapiService.findOpenapi(bankcode, accountNumber);
-		if(api == null) {
-			throw new EntityNotFound("계좌번호 : " + accountNumber + "는 존재하지 않습니다.");
-		}
-		Optional<Member> optMem = memberRepo.findById(memberId);
-		Member m = null;
-		if(optMem.isPresent()) {
-			m = optMem.get();
-		} else {
-			throw new EntityNotFound("존재하지 않는 회원입니다.");
-		}
+		Member m = memberService.findById(memberId);
 		
 		Account account = new Account();
 		account.setMember(m);
@@ -48,6 +38,7 @@ public class AccountService {
 			throw new EntityAlreadyExistsException("이미 등록된 계좌입니다.");
 		}
 		
+		// em.persist(account)
 		accountRepo.save(account);
 		
 		return account.getId();
@@ -65,17 +56,6 @@ public class AccountService {
 	private boolean alreadyAccount(Account account) {
 		Account a = accountRepo.findByOpenapi(account.getOpenapi());
 		return a != null ? true : false;
-	}
-	
-	// 다른 채널을 통해 계좌로 금융 거래를 했을지도 모르므로
-	// 대시보드를 보여주기 전에 항상 업데이트를 해야 한다.
-	public Long updateAccount(Account account) {
-		Openapi oldOpenapi = account.getOpenapi();
-		Openapi api = openapiService.findById(oldOpenapi.getId());
-		account.setOpenapi(api);
-		accountRepo.save(account);
-		
-		return account.getId();
 	}
 	
 	public AccountInfo getAccountInfo(Long id) {

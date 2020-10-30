@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Min;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -42,6 +43,7 @@ public class Openapi {
 	// openapi 테이블의 balance 컬럼의 데이터 타입은 BIGINT UNSIGNED 0 ~ 18446744073709551615
 	// JAVA에서 unsigned은 사용을 권장하지 않으므로 db에서 데이터를 로드할 때 데이터 손실이 생길 수 있다.
 	// 다만 현실적으로 잔액이 Long의 상한을 넘기는 일은 일어나지 않을 것이므로 Long 타입을 사용한다.  
+	@Min(value=0, message="잔고는 0원보다 작을 수 없습니다.")
 	private Long balance;
 	
 	public void setBankcode(Bankcode bankcode) {

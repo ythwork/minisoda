@@ -9,6 +9,7 @@ import static org.springframework.data.jpa.domain.Specification.where;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
+import com.ythwork.soda.exception.TransactionFailureException;
 
 @Service
 @Transactional
@@ -52,8 +54,41 @@ public class TransactionService {
 		return transaction.getId();
 	}
 	
-	public boolean transfer(Transaction transaction) {
+	public boolean transfer(Long transactionId) {
+		Optional<Transaction> optTransaction = transactionRepo.findById(transactionId);
+		Transaction transaction = null;
+		if(optTransaction.isPresent()) {
+			transaction = optTransaction.get();
+		} else {
+			return false;
+		}
+		
+		Openapi send = transaction.getSend();
+		Openapi recv = transaction.getRecv();
+		
+		Long sendBalance = send.getBalance();
+		Long recvBalance = recv.getBalance();
+		Long amount = transaction.getAmount();
+		
+		if(sendBalance - amount < 0) {
+			transaction.setTransactionStatus(TransactionStatus.FAILED);
+			throw new TransactionFailureException("잔고가 부족합니다.");
+		}
+		sendBalance -= amount;
+		recvBalance += amount;
+		
+		send.setBalance(sendBalance);
+		recv.setBalance(recvBalance);
+		
+		Long afterBalance = sendBalance;
+		transaction.setAfterBalance(afterBalance);
+		transaction.setTransactionStatus(TransactionStatus.SUCCEEDED);
+				
 		return true;
+	}
+	
+	public void cancelTransaction(Long transactionId) {
+		transactionRepo.deleteById(transactionId);
 	}
 	
 	public List<Transaction> search(TransactionFilter filter) {

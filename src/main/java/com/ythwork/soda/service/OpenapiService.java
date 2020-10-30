@@ -28,7 +28,12 @@ public class OpenapiService {
 		if(bankcode == null) {
 			throw new EntityNotFound("은행 코드 : " + code + "는 존재하지 않습니다.");
 		}
-		return openapiRepo.findByBankcodeAndAccountNumber(bankcode, accountNumber);
+		Openapi api = openapiRepo.findByBankcodeAndAccountNumber(bankcode, accountNumber);
+		if(api != null) {
+			return api;
+		} else {
+			throw new EntityNotFound("계좌번호 : " + accountNumber + "가 존재하지 않습니다.");
+		}
 	}
 	
 	public Openapi findById(Long id) {
