@@ -13,6 +13,9 @@ CREATE TABLE member (
 		email VARCHAR(200) NOT NULL, 
 		PRIMARY KEY(member_id));
 
+ALTER TABLE member
+		ADD INDEX ix_email(email);
+
 CREATE TABLE bankcode (
 		bankcode_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		code VARCHAR(20));
