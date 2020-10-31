@@ -21,6 +21,7 @@ import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
+import com.ythwork.soda.exception.EntityNotFound;
 import com.ythwork.soda.exception.TransactionFailureException;
 
 @Service
@@ -42,11 +43,12 @@ public class TransactionService {
 		Openapi send = accountService.findOpenapiByAccountId(sendAcntId);
 		Openapi recv = openapiService.findOpenapi(recvcode, recvAcntNum);
 		
-		Long afterBalance = send.getBalance();
+		Long afterBalance = 0L;
 		
 		transaction.setMember(member);
 		transaction.setSend(send);
 		transaction.setRecv(recv);
+		transaction.setAmount(amount);
 		transaction.setAfterBalance(afterBalance);
 		
 		transactionRepo.save(transaction);
@@ -77,6 +79,13 @@ public class TransactionService {
 		sendBalance -= amount;
 		recvBalance += amount;
 		
+		// 실제 트랜잭션이 실행되고 변경 사항을 
+		// 퍼시스턴스 컨텍스트에 저장한다.
+		// 퍼시스턴스 컨텍스트는 변경된 내용에 대해 
+		// UPDATE 구문을 쌓아두었다가 flush 시점에
+		// 데이터베이스에 SQL을 실행한다.
+		// 따로 repository에 어떤 함수를 실행하거나 할 필요는 없다. 
+		
 		send.setBalance(sendBalance);
 		recv.setBalance(recvBalance);
 		
@@ -106,5 +115,18 @@ public class TransactionService {
 								.and(processAtBetween(from, to))
 								.and(statusIs(status))
 								.and(amountGtOrEt(amount))));
+	}
+	
+	public Transaction findById(Long id) {
+		Optional<Transaction> transaction = transactionRepo.findById(id);
+		if(transaction.isPresent()) {
+			return transaction.get();
+		} else {
+			throw new EntityNotFound("transaction id [" + id + "]를 가진 트랜잭션 내역이 없습니다.");
+		}
+	}
+	
+	public void deleteAll() {
+		transactionRepo.deleteAll();
 	}
 }

@@ -39,6 +39,8 @@ public class AccountService {
 		}
 		
 		// em.persist(account)
+		// 퍼시스턴스 컨텍스트의 1차 캐시에 등록 
+		// 이 시점에 아직 데이터베이스로 SQL을 전송하지는 않는다.
 		accountRepo.save(account);
 		
 		return account.getId();
@@ -76,5 +78,9 @@ public class AccountService {
 	
 	public void deleteAccount(Long id) {
 		accountRepo.deleteById(id);
+	}
+	
+	public void deleteAll() {
+		accountRepo.deleteAll();
 	}
 }

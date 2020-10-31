@@ -46,5 +46,7 @@ public class MemberService {
 		}
 	}
 	
-	
+	public void deleteAll() {
+		memberRepo.deleteAll();
+	}
 }

@@ -44,4 +44,8 @@ public class OpenapiService {
 			throw new EntityNotFoundException("계좌 정보가 없습니다.");
 		}
 	}
+	
+	public void deleteAll() {
+		openapiRepo.deleteAll();
+	}
 }
