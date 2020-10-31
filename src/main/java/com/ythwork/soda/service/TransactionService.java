@@ -79,12 +79,14 @@ public class TransactionService {
 		sendBalance -= amount;
 		recvBalance += amount;
 		
-		// 실제 트랜잭션이 실행되고 변경 사항을 
-		// 퍼시스턴스 컨텍스트에 저장한다.
-		// 퍼시스턴스 컨텍스트는 변경된 내용에 대해 
-		// UPDATE 구문을 쌓아두었다가 flush 시점에
-		// 데이터베이스에 SQL을 실행한다.
-		// 따로 repository에 어떤 함수를 실행하거나 할 필요는 없다. 
+		// 트랜잭션이 실행되고 변경 사항을 
+		// 퍼시스턴스 컨텍스트의 1차 캐시에 저장한다.
+		
+		// 퍼시스턴스 컨텍스트는 flush() 호출할 때 
+		// 1차 캐시의 엔티티를 스냅샷과 비교하고
+		// 변경된 내용에 대해 UPDATE 구문을 쓰기 지연 저장소에 등록한다.
+		// 등록된 쿼리가 데이터베이스에 전송되어 동기화된다. 
+		// 커밋이 일어나면 그때 모든 변경 사항이 데이터베이스에서 실행된다.
 		
 		send.setBalance(sendBalance);
 		recv.setBalance(recvBalance);

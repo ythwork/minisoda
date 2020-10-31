@@ -91,20 +91,22 @@ public class TransactionServiceTests {
 		//when
 		Long transactionId = transactionService.createTransaction(m.getId(), sendAcntId, "B BANK", "987-65-4321", 10000L);
 		
-		// 트랜잭션 상태는 잘 변경되는지 확인하기 위해 트랜잭션을 받아온다.
 		Transaction transaction = transactionService.findById(transactionId);
 		log.info("Transaction Status : " + transaction.getTransactionStatus());
 		
+		// 퍼시스턴스 컨텍스트에 속해있는 상태이므로 1차 캐시를 이용한다. 
+		// flush()는 트랜잭션이 끝날 때 실행되므로 아직 데이터베이스에 
+		// 변경 사항이 반영되지 않는다. 
 		transactionService.transfer(transactionId);
 		
 		log.info("AFTER TRANSFER");
-		// 퍼시스턴스 컨텍스트에 속해있는 상태이므로 openapiRepo를 이용해 
-		// 다시 받아오지 않아도 데이터가 업데이트 된다. 
-		// lazy writing을 하므로 트랜잭션이 끝나기 전에는 flush 하지 않는다. 
+		
 		printAccountInfo("send", send);
 		printAccountInfo("recv", recv);
 		
-		// 무사히 변경되었다.
+		// get() 사용할 때는 em.find()를 사용할 것이므로
+		// 1차 캐시를 먼저 찾아보고 없다면 
+		// 데이터베이스에 접근한다. 
 		log.info("Transaction Status : " + transaction.getTransactionStatus());
 
 		
