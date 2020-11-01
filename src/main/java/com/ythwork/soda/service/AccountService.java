@@ -1,6 +1,8 @@
 package com.ythwork.soda.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import com.ythwork.soda.data.AccountRepository;
 import com.ythwork.soda.domain.Account;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.domain.Openapi;
+import com.ythwork.soda.dto.AccountAddInfo;
 import com.ythwork.soda.dto.AccountInfo;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
 import com.ythwork.soda.exception.EntityNotFound;
@@ -26,7 +29,11 @@ public class AccountService {
 	
 	// 서비스에 이용할 계좌를 추가한다.
 	// 성공하면 등록한 계좌 정보를 반환한다.
-	public Long addAccountToBoard(Long memberId, String bankcode, String accountNumber) {
+	public AccountInfo addAccountToBoard(AccountAddInfo accountAddInfo) {
+		Long memberId = accountAddInfo.getMemberId();
+		String bankcode = accountAddInfo.getCode();
+		String accountNumber = accountAddInfo.getAccountNumber();
+		
 		Openapi api = openapiService.findOpenapi(bankcode, accountNumber);
 		Member m = memberService.findById(memberId);
 		
@@ -43,7 +50,7 @@ public class AccountService {
 		// 이 시점에 아직 데이터베이스로 SQL을 전송하지는 않는다.
 		accountRepo.save(account);
 		
-		return account.getId();
+		return fromAccountToAccountInfo(account);
 	}
 	
 	public Openapi findOpenapiByAccountId(Long accountId) {
@@ -60,6 +67,14 @@ public class AccountService {
 		return a != null ? true : false;
 	}
 	
+	private AccountInfo fromAccountToAccountInfo(Account account) {
+		return new AccountInfo(account.getOpenapi().getOwner(), 
+				account.getOpenapi().getBankcode().getCode(), 
+				account.getOpenapi().getAccountNumber(),
+				account.getOpenapi().getBalance(),
+				account.getId());
+	}
+	
 	public AccountInfo getAccountInfo(Long id) {
 		Optional<Account> optAccount = accountRepo.findById(id);
 		Account account = null;
@@ -69,11 +84,12 @@ public class AccountService {
 			throw new EntityNotFound("계좌 정보가 아직 등록되어 있지 않습니다.");
 		}
 		
-		return new AccountInfo(account.getOpenapi().getOwner(), 
-					account.getOpenapi().getBankcode().getCode(), 
-					account.getOpenapi().getAccountNumber(),
-					account.getOpenapi().getBalance(),
-					account.getId());
+		return fromAccountToAccountInfo(account);
+	}
+	
+	public List<AccountInfo> getAllAccountInfos() {
+		List<Account> allAccounts = accountRepo.findAll();
+		return allAccounts.stream().map(this::fromAccountToAccountInfo).collect(Collectors.toList());
 	}
 	
 	public void deleteAccount(Long id) {

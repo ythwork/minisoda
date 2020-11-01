@@ -14,6 +14,8 @@ import com.ythwork.soda.domain.Bankcode;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
+import com.ythwork.soda.dto.AccountAddInfo;
+import com.ythwork.soda.dto.AccountInfo;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -86,10 +88,10 @@ public class TransactionServiceTests {
 		printAccountInfo("send", send);
 		printAccountInfo("recv", recv);
 		
-		Long sendAcntId = accountService.addAccountToBoard(m.getId(), "A BANK", "123-45-6789");
+		AccountInfo sendAcntInfo = accountService.addAccountToBoard(new AccountAddInfo(m.getId(), "A BANK", "123-45-6789"));
 		
 		//when
-		Long transactionId = transactionService.createTransaction(m.getId(), sendAcntId, "B BANK", "987-65-4321", 10000L);
+		Long transactionId = transactionService.createTransaction(m.getId(), sendAcntInfo.getAccountId(), "B BANK", "987-65-4321", 10000L);
 		
 		// pk인 id를 기준으로 하는 find()는 flush() 하지 않는다. 1차 캐시에서 엔티티를 찾을 수 있다.
 		// 쿼리 메서드를 구성해 find() 할 경우에는 JPQL을 구성해 데이터베이스를 조회한다.

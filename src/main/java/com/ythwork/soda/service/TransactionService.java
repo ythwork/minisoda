@@ -142,6 +142,10 @@ public class TransactionService {
 		}
 	}
 	
+	public void deleteById(Long id) {
+		transactionRepo.deleteById(id);
+	}
+	
 	public void deleteAll() {
 		transactionRepo.deleteAll();
 	}
