@@ -20,6 +20,7 @@ import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.dto.TransactionAddInfo;
 import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.InvalidTransactionInfoProvidedException;
 import com.ythwork.soda.exception.TransactionNotFoundException;
 import com.ythwork.soda.hateoas.TransactionModelAssembler;
 import com.ythwork.soda.service.TransactionService;
@@ -62,11 +63,9 @@ public class TransactionController {
 		Transaction transaction = null;
 		try {
 			transaction = transactionService.createTransaction(transactionAddInfo);
-		} catch() {
-			 
-		} catch() {
-			
-		}
+		} catch(EntityNotFound e) {
+			 throw new InvalidTransactionInfoProvidedException(e.getMessage(), e);
+		} 
 		
 		return ResponseEntity.created(linkTo(methodOn(TransactionController.class).getTransaction(transaction.getId())).toUri())
 				.body(assembler.toModel(transaction));
