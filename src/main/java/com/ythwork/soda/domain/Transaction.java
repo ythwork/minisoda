@@ -66,10 +66,7 @@ public class Transaction {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date processAt;
 	
-	public Transaction() {
-		// 거래가 시작되었다.
-		this.transactionStatus = TransactionStatus.IN_PROCESS;
-	}
+	public Transaction() {}
 	
 	public void setMember(Member member) {
 		this.member = member;

@@ -21,6 +21,7 @@ import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
+import com.ythwork.soda.dto.TransactionAddInfo;
 import com.ythwork.soda.exception.EntityNotFound;
 import com.ythwork.soda.exception.TransactionFailureException;
 
@@ -36,24 +37,29 @@ public class TransactionService {
 	@Autowired
 	private TransactionRepository transactionRepo;
 	
-	public Long createTransaction(Long memberId, Long sendAcntId, String recvcode, String recvAcntNum, Long amount) {
+	public Transaction createTransaction(TransactionAddInfo transactionAddInfo) {
+		Long memberId = transactionAddInfo.getMemberId();
+		Long sendAcntId = transactionAddInfo.getSendAcntId();
+		String recvcode = transactionAddInfo.getRecvcode();
+		String recvAcntNum = transactionAddInfo.getRecvAcntNum();
+		Long amount = transactionAddInfo.getAmount();
+		
 		Transaction transaction = new Transaction();
 		
 		Member member = memberService.findById(memberId);
 		Openapi send = accountService.findOpenapiByAccountId(sendAcntId);
 		Openapi recv = openapiService.findOpenapi(recvcode, recvAcntNum);
-		
-		Long afterBalance = 0L;
-		
+				
 		transaction.setMember(member);
 		transaction.setSend(send);
 		transaction.setRecv(recv);
 		transaction.setAmount(amount);
-		transaction.setAfterBalance(afterBalance);
+		transaction.setAfterBalance(0L);
+		transaction.setTransactionStatus(TransactionStatus.IN_PROCESS);
 		
-		transactionRepo.save(transaction);
+		Transaction newTransaction = transactionRepo.save(transaction);
 		
-		return transaction.getId();
+		return newTransaction;
 	}
 	
 	public boolean transfer(Long transactionId) {
