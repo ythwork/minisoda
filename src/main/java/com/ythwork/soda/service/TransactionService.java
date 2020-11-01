@@ -67,7 +67,7 @@ public class TransactionService {
 		
 		Openapi send = transaction.getSend();
 		Openapi recv = transaction.getRecv();
-		
+				
 		Long sendBalance = send.getBalance();
 		Long recvBalance = recv.getBalance();
 		Long amount = transaction.getAmount();
@@ -81,19 +81,33 @@ public class TransactionService {
 		
 		// 트랜잭션이 실행되고 변경 사항을 
 		// 퍼시스턴스 컨텍스트의 1차 캐시에 저장한다.
-		
+						
 		// 퍼시스턴스 컨텍스트는 flush() 호출할 때 
 		// 1차 캐시의 엔티티를 스냅샷과 비교하고
 		// 변경된 내용에 대해 UPDATE 구문을 쓰기 지연 저장소에 등록한다.
 		// 등록된 쿼리가 데이터베이스에 전송되어 동기화된다. 
 		// 커밋이 일어나면 그때 모든 변경 사항이 데이터베이스에서 실행된다.
 		
+		// ---------- 업데이트 쿼리 시작 ------------------
+		/*
+		 현재 트랜잭션 안이므로 변경 사항은 퍼시스턴스 컨텍스트의 1차 캐시에 저장
+		 트랜잭션 종료되면 
+		 스냅샷과 비교 -> UPDATE 구문 생성 -> SQL 저장소 등록 -> 데이터베이스 동기화 
+		
+		 UPDATE 잠금 수준은 항상 잠금 대상보다 실제 update 적용 대상이 적으므로 
+		 JPA의 PESSIMISTIC_WRITE를 이용해 row 단위로 SELECT ...FOR UPDATE를 걸고 
+		 변경하는 것을 고려해볼 수 있으나 
+		 이번 경우에는 변경하려는 튜플을 특정할 수 있으므로 UPDATE 구문만으로 충분하다.
+		*/
 		send.setBalance(sendBalance);
 		recv.setBalance(recvBalance);
+		
 		
 		Long afterBalance = sendBalance;
 		transaction.setAfterBalance(afterBalance);
 		transaction.setTransactionStatus(TransactionStatus.SUCCEEDED);
+		
+		// ----------- 업데이트 쿼리 종료 ----------------
 				
 		return true;
 	}
