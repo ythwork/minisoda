@@ -16,6 +16,7 @@ import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.dto.AccountAddInfo;
 import com.ythwork.soda.dto.AccountInfo;
+import com.ythwork.soda.dto.TransactionAddInfo;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,19 +92,18 @@ public class TransactionServiceTests {
 		AccountInfo sendAcntInfo = accountService.addAccountToBoard(new AccountAddInfo(m.getId(), "A BANK", "123-45-6789"));
 		
 		//when
-		Long transactionId = transactionService.createTransaction(m.getId(), sendAcntInfo.getAccountId(), "B BANK", "987-65-4321", 10000L);
+		Transaction transaction = transactionService.createTransaction(new TransactionAddInfo(m.getId(), sendAcntInfo.getAccountId(), "B BANK", "987-65-4321", 10000L));
 		
 		// pk인 id를 기준으로 하는 find()는 flush() 하지 않는다. 1차 캐시에서 엔티티를 찾을 수 있다.
 		// 쿼리 메서드를 구성해 find() 할 경우에는 JPQL을 구성해 데이터베이스를 조회한다.
 		// 데이터베이스에서 SQL을 수행해 탐색하므로 flush()를 먼저 실행해서
 		// 변경 사항을 모두 데이터베이스에 반영한 후에야 탐색이 가능하다.
-		Transaction transaction = transactionService.findById(transactionId);
 		log.info("Transaction Status : " + transaction.getTransactionStatus());
 		
 		// 퍼시스턴스 컨텍스트에 속해있는 상태이므로 1차 캐시를 이용한다. 
 		// flush()는 트랜잭션이 끝날 때 실행되므로 아직 데이터베이스에 
 		// 변경 사항이 반영되지 않는다. 
-		transactionService.transfer(transactionId);
+		transactionService.transfer(transaction.getId());
 		
 		log.info("AFTER TRANSFER");
 		
