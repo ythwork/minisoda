@@ -47,7 +47,6 @@ public class TransactionController {
 	
 	@GetMapping
 	public CollectionModel<EntityModel<TransactionInfo>> search(@RequestBody TransactionFilter transactionFilter) {
-		System.out.println("TransactionFilter : " + transactionFilter);
 		List<EntityModel<TransactionInfo>> transactions = transactionService.search(transactionFilter).stream()
 				.map(assembler::toModel)
 				.collect(Collectors.toList());
