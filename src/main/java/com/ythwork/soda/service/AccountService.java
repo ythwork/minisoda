@@ -73,7 +73,7 @@ public class AccountService {
 		return a != null ? true : false;
 	}
 	
-	private AccountInfo fromAccountToAccountInfo(Account account) {
+	public AccountInfo fromAccountToAccountInfo(Account account) {
 		return new AccountInfo(account.getOpenapi().getOwner(), 
 				account.getOpenapi().getBankcode().getCode(), 
 				account.getOpenapi().getAccountNumber(),

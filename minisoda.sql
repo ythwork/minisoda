@@ -50,7 +50,7 @@ CREATE TABLE transaction (
 		send_account INT NOT NULL, 
 		recv_account INT NOT NULL,
 		amount BIGINT UNSIGNED NOT NULL,
-		after_balance BIGINT UNSIGNED NOT NULL,
+		after_balance BIGINT NOT NULL,
 		transaction_status VARCHAR(10) NOT NULL, 
 		process_at TIMESTAMP NOT NULL,  
 		CONSTRAINT fk_member_id_member 

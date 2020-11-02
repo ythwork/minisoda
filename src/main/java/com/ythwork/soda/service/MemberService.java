@@ -81,7 +81,7 @@ public class MemberService {
 		memberRepo.deleteAll();
 	}
 	
-	private MemberInfo fromMemberToMemberInfo(Member member) {
+	public MemberInfo fromMemberToMemberInfo(Member member) {
 		return new MemberInfo(
 				member.getLastName() + member.getFirstName(), 
 				member.getAddress(), 

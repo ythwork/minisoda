@@ -26,6 +26,7 @@ import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
+import com.ythwork.soda.dto.TransactionInfo;
 import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.InvalidTransactionInfoProvidedException;
 import com.ythwork.soda.exception.NotEnoughBalanceException;
@@ -45,8 +46,9 @@ public class TransactionController {
 	}
 	
 	@GetMapping
-	public CollectionModel<EntityModel<Transaction>> search(@RequestBody TransactionFilter transactionFilter) {
-		List<EntityModel<Transaction>> transactions = transactionService.search(transactionFilter).stream()
+	public CollectionModel<EntityModel<TransactionInfo>> search(@RequestBody TransactionFilter transactionFilter) {
+		System.out.println("TransactionFilter : " + transactionFilter);
+		List<EntityModel<TransactionInfo>> transactions = transactionService.search(transactionFilter).stream()
 				.map(assembler::toModel)
 				.collect(Collectors.toList());
 		
@@ -55,45 +57,46 @@ public class TransactionController {
 	}
 	
 	@GetMapping("/{id}")
-	public EntityModel<Transaction> getTransaction(@PathVariable Long id) {
-		Transaction transaction = null; 
+	public EntityModel<TransactionInfo> getTransaction(@PathVariable Long id) {
+		TransactionInfo transactionInfo = null; 
 		try {
-			transaction = transactionService.findById(id);
+			transactionInfo = transactionService.getTransactionInfoById(id);
 		} catch(EntityNotFoundException e) {
 			throw new TransactionNotFoundException(e.getMessage(), e);
 		}
 		
-		return assembler.toModel(transaction);
+		return assembler.toModel(transactionInfo);
 	}
 	
 	@PostMapping
-	public ResponseEntity<EntityModel<Transaction>> newTransaction(@RequestBody TransactionAddInfo transactionAddInfo) {
-		Transaction transaction = null;
+	public ResponseEntity<EntityModel<TransactionInfo>> newTransaction(@RequestBody TransactionAddInfo transactionAddInfo) {
+		TransactionInfo transactionInfo = null;
 		try {
-			transaction = transactionService.createTransaction(transactionAddInfo);
+			transactionInfo = transactionService.createTransaction(transactionAddInfo);
 		} catch(EntityNotFoundException e) {
 			 throw new InvalidTransactionInfoProvidedException(e.getMessage(), e);
 		} 
 		
-		return ResponseEntity.created(linkTo(methodOn(TransactionController.class).getTransaction(transaction.getId())).toUri())
-				.body(assembler.toModel(transaction));
+		return ResponseEntity.created(linkTo(methodOn(TransactionController.class).getTransaction(transactionInfo.getTransactionId())).toUri())
+				.body(assembler.toModel(transactionInfo));
 	}
 	
 	@PutMapping("/{id}/complete")
 	public ResponseEntity<?> complete(@PathVariable Long id) {
-		Transaction transaction = null;
+		TransactionInfo transactionInfo = null;
 		try {
-			transaction = transactionService.findById(id);
+			transactionInfo = transactionService.getTransactionInfoById(id);
 		} catch(EntityNotFoundException e) {
 			throw new TransactionNotFoundException(e.getMessage(), e);
 		}
 		
-		if(transaction.getTransactionStatus() == TransactionStatus.IN_PROCESS) {
+		if(transactionInfo.getTransactionStatus() == TransactionStatus.IN_PROCESS) {
 			try {
-				Transaction completedTransaction = transactionService.transfer(transaction);
-				return ResponseEntity.ok(assembler.toModel(completedTransaction));
+				TransactionInfo completedTransactionInfo = transactionService.transfer(transactionInfo.getTransactionId());
+				return ResponseEntity.ok(assembler.toModel(completedTransactionInfo));
 			} catch(NotEnoughBalanceException e) {
-				return ResponseEntity.badRequest().body(assembler.toModel(transaction));
+				TransactionInfo failedTransactionInfo = transactionService.getTransactionInfoById(transactionInfo.getTransactionId());
+				return ResponseEntity.badRequest().body(assembler.toModel(failedTransactionInfo));
 			}
 		}
 		
@@ -104,7 +107,7 @@ public class TransactionController {
 				.body(Problem
 						.create()
 						.withTitle("Method not allowed")
-						.withDetail("진행 중이 아닌 경우 송금할 수 없습니다. 현재 트랜잭션 상태는 " + transaction.getTransactionStatus() + "입니다."));
+						.withDetail("진행 중이 아닌 경우 송금할 수 없습니다. 현재 트랜잭션 상태는 " + transactionInfo.getTransactionStatus() + "입니다."));
 	}
 	
 	@DeleteMapping("/{id}/cancel")
@@ -119,7 +122,8 @@ public class TransactionController {
 		if(transaction.getTransactionStatus() == TransactionStatus.IN_PROCESS) {
 			transactionService.deleteById(transaction.getId());
 			transaction.setTransactionStatus(TransactionStatus.CANCELED);
-			return ResponseEntity.ok(assembler.toModel(transaction));
+			return ResponseEntity.ok(assembler.toModel(
+					transactionService.fromTransactionToTransactionInfo(transaction)));
 		}
 		
 		return ResponseEntity

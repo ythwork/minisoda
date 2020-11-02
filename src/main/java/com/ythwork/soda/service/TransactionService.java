@@ -7,9 +7,12 @@ import static com.ythwork.soda.domain.TransactionSpec.sendIs;
 import static com.ythwork.soda.domain.TransactionSpec.statusIs;
 import static org.springframework.data.jpa.domain.Specification.where;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
+import com.ythwork.soda.dto.TransactionInfo;
 import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.NotEnoughBalanceException;
 
@@ -41,7 +45,7 @@ public class TransactionService {
 	@Autowired
 	private TransactionRepository transactionRepo;
 	
-	public Transaction createTransaction(TransactionAddInfo transactionAddInfo) {
+	public TransactionInfo createTransaction(TransactionAddInfo transactionAddInfo) {
 		Long memberId = transactionAddInfo.getMemberId();
 		Long sendAcntId = transactionAddInfo.getSendAcntId();
 		String recvcode = transactionAddInfo.getRecvcode();
@@ -63,10 +67,18 @@ public class TransactionService {
 		
 		Transaction newTransaction = transactionRepo.save(transaction);
 		
-		return newTransaction;
+		return fromTransactionToTransactionInfo(newTransaction);
 	}
 	
-	public Transaction transfer(Transaction transaction) {
+	public TransactionInfo transfer(Long transactionId) {
+		Optional<Transaction> optTransaction = transactionRepo.findById(transactionId);
+		Transaction transaction = null;
+		if(optTransaction.isPresent()) {
+			transaction = optTransaction.get();
+		} else {
+			throw new EntityNotFoundException("transaction id [" + transactionId + "]를 가진 트랜잭션 내역이 없습니다.");
+		}
+		
 		Openapi send = transaction.getSend();
 		Openapi recv = transaction.getRecv();
 				
@@ -111,28 +123,49 @@ public class TransactionService {
 		
 		// ----------- 업데이트 쿼리 종료 ----------------
 		
-		return transaction;
+		return fromTransactionToTransactionInfo(transaction);
 	}
 	
 	public void cancelTransaction(Long transactionId) {
 		transactionRepo.deleteById(transactionId);
 	}
 	
-	public List<Transaction> search(TransactionFilter filter) {
+	public List<TransactionInfo> search(TransactionFilter filter) {
 		Long memberId = filter.getMemberId();
 		Long sendAcntId = filter.getSendAcntId();
-		Date from = filter.getFrom();
-		Date to = filter.getTo();
+		String fromString = filter.getFrom();
+		String toString = filter.getTo();
 		TransactionStatus status = filter.getStatus();
-		Member member = memberService.findById(memberId);
-		Openapi send = accountService.findOpenapiByAccountId(sendAcntId);
+		
+		Member member = null;
+		if(memberId != null) 
+			member = memberService.findById(memberId);
+
+		Openapi send = null;
+		if(sendAcntId != null)
+			send = accountService.findOpenapiByAccountId(sendAcntId);
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date from = null;
+		Date to = null;
+		try {
+			if(fromString != null)
+				from = format.parse(fromString);
+			if(toString != null)
+				to = format.parse(toString);
+		} catch(ParseException e) {}
+		
 		Long amount = filter.getAmount();
 		
-		return transactionRepo.findAll(where(memberIs(member)
+		List<Transaction> transactions = transactionRepo.findAll(where(memberIs(member)
 								.and(sendIs(send))
 								.and(processAtBetween(from, to))
 								.and(statusIs(status))
 								.and(amountGtOrEt(amount))));
+		
+		return transactions.stream()
+				.map(this::fromTransactionToTransactionInfo)
+				.collect(Collectors.toList());
 	}
 	
 	public Transaction findById(Long id) {
@@ -144,11 +177,35 @@ public class TransactionService {
 		}
 	}
 	
+	public TransactionInfo getTransactionInfoById(Long id) {
+		Optional<Transaction> optTransaction = transactionRepo.findById(id);
+		if(optTransaction.isPresent()) {
+			 Transaction transaction = optTransaction.get();
+			 return fromTransactionToTransactionInfo(transaction);
+		} else {
+			throw new EntityNotFoundException("transaction id [" + id + "]를 가진 트랜잭션 내역이 없습니다.");
+		}
+	}
+	
 	public void deleteById(Long id) {
 		transactionRepo.deleteById(id);
 	}
 	
 	public void deleteAll() {
 		transactionRepo.deleteAll();
+	}
+	
+	public TransactionInfo fromTransactionToTransactionInfo(Transaction transaction) {
+		return new TransactionInfo(
+				transaction.getMember().getId(),
+				transaction.getSend().getBankcode().getCode(),
+				transaction.getSend().getAccountNumber(),
+				transaction.getRecv().getBankcode().getCode(),
+				transaction.getRecv().getAccountNumber(),
+				transaction.getAmount(),
+				transaction.getAfterBalance(),
+				transaction.getTransactionStatus(),
+				transaction.getProcessAt(),
+				transaction.getId());
 	}
 }
