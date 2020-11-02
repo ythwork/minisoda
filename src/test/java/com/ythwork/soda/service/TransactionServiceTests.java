@@ -103,7 +103,7 @@ public class TransactionServiceTests {
 		// 퍼시스턴스 컨텍스트에 속해있는 상태이므로 1차 캐시를 이용한다. 
 		// flush()는 트랜잭션이 끝날 때 실행되므로 아직 데이터베이스에 
 		// 변경 사항이 반영되지 않는다. 
-		transactionService.transfer(transaction.getId());
+		transactionService.transfer(transaction);
 		
 		log.info("AFTER TRANSFER");
 		

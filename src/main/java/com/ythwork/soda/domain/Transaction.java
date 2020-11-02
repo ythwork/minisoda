@@ -27,6 +27,7 @@ import lombok.ToString;
 public class Transaction {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "transaction_id")
 	private Long id;
 	
 	// 회원이 탈퇴했을 때 거래 내역이 남는 것은 옳지 않으므로

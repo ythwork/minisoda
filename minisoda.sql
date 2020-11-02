@@ -62,3 +62,22 @@ CREATE TABLE transaction (
 
 ALTER TABLE transaction
 	ADD INDEX ix_process_at(process_at);
+
+INSERT INTO bankcode (code)
+	VALUES
+	('A BANK'),
+	('B BANK'),
+	('C BANK');
+
+INSERT INTO openapi (bankcode_id, account_number, owner, balance)
+	VALUES
+	(1, '123-45-6789', "양태환", 50000),
+	(2, '111-22-3333', "양태환", 20000),
+	(3, '222-33-4321', "양태환", 10000),
+	(1, '333-44-1234', "이순신", 30000),
+	(2, '222-33-4321', "장영실", 500);
+
+INSERT INTO member (first_name, last_name, country, province, city, street, house_number, phone_number, email) 
+	VALUES 
+	("태환", "양", "대한민국", "경기도", "군포시", "산본천로", "214", "01066496270", "ythwork@naver.com"),  
+	("순신", "이", "대한민국", "경기도", "한양시", "육전거리", "111", "01011111234", "sunsin@gmail.com");

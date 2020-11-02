@@ -15,7 +15,7 @@ import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.dto.AccountAddInfo;
 import com.ythwork.soda.dto.AccountInfo;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
-import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.EntityNotFoundException;
 
 @Service
 @Transactional
@@ -33,9 +33,15 @@ public class AccountService {
 		Long memberId = accountAddInfo.getMemberId();
 		String bankcode = accountAddInfo.getCode();
 		String accountNumber = accountAddInfo.getAccountNumber();
+		Openapi api = null;
+		Member m = null;
 		
-		Openapi api = openapiService.findOpenapi(bankcode, accountNumber);
-		Member m = memberService.findById(memberId);
+		try {
+			api = openapiService.findOpenapi(bankcode, accountNumber);
+			m = memberService.findById(memberId);
+		} catch(EntityNotFoundException e) {
+			throw e;
+		}
 		
 		Account account = new Account();
 		account.setMember(m);
@@ -58,7 +64,7 @@ public class AccountService {
 		if(optAccount.isPresent()) {
 			return optAccount.get().getOpenapi();
 		} else {
-			throw new EntityNotFound("계좌 정보를 찾지 못했습니다.");
+			throw new EntityNotFoundException("계좌 정보를 찾지 못했습니다.");
 		}
 	}
 	
@@ -81,7 +87,7 @@ public class AccountService {
 		if(optAccount.isPresent()) {
 			account = optAccount.get();
 		} else {
-			throw new EntityNotFound("계좌 정보가 아직 등록되어 있지 않습니다.");
+			throw new EntityNotFoundException("계좌 정보가 아직 등록되어 있지 않습니다.");
 		}
 		
 		return fromAccountToAccountInfo(account);

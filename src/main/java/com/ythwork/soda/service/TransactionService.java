@@ -22,14 +22,14 @@ import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
-import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.NotEnoughBalanceException;
 
 @Service
 // @Transactional은 unchecked exception = RuntimeException subclass에서만 롤백한다.
 // check exception도 롤백하고 싶다면 @Transactional(rollbackFor = Exception.class)라고 명시해야 한다.
 // unchecked exception 이지만 익셉션이 발생했을 때 발생 시점까지를 커밋하고 싶다면
-// @Transactional(noRollbackFor=NotEoughBalanceException.class)처럼 명시하면 된다.
+// @Transactional(noRollbackFor=NotEnoughBalanceException.class)처럼 명시하면 된다.
 @Transactional(noRollbackFor=NotEnoughBalanceException.class)
 public class TransactionService {
 	@Autowired
@@ -140,7 +140,7 @@ public class TransactionService {
 		if(transaction.isPresent()) {
 			return transaction.get();
 		} else {
-			throw new EntityNotFound("transaction id [" + id + "]를 가진 트랜잭션 내역이 없습니다.");
+			throw new EntityNotFoundException("transaction id [" + id + "]를 가진 트랜잭션 내역이 없습니다.");
 		}
 	}
 	

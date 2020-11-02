@@ -26,7 +26,7 @@ import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
-import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.InvalidTransactionInfoProvidedException;
 import com.ythwork.soda.exception.NotEnoughBalanceException;
 import com.ythwork.soda.exception.TransactionNotFoundException;
@@ -59,7 +59,7 @@ public class TransactionController {
 		Transaction transaction = null; 
 		try {
 			transaction = transactionService.findById(id);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			throw new TransactionNotFoundException(e.getMessage(), e);
 		}
 		
@@ -71,7 +71,7 @@ public class TransactionController {
 		Transaction transaction = null;
 		try {
 			transaction = transactionService.createTransaction(transactionAddInfo);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			 throw new InvalidTransactionInfoProvidedException(e.getMessage(), e);
 		} 
 		
@@ -84,7 +84,7 @@ public class TransactionController {
 		Transaction transaction = null;
 		try {
 			transaction = transactionService.findById(id);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			throw new TransactionNotFoundException(e.getMessage(), e);
 		}
 		
@@ -112,7 +112,7 @@ public class TransactionController {
 		Transaction transaction = null;
 		try {
 			transaction = transactionService.findById(id);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			throw new TransactionNotFoundException(e.getMessage(), e);
 		}
 		

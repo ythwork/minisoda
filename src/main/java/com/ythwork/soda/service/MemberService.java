@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ythwork.soda.data.MemberRepository;
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
-import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.EntityNotFoundException;
 
 @Service
 @Transactional
@@ -42,7 +42,7 @@ public class MemberService {
 		if(optMember.isPresent()) {
 			return optMember.get();
 		} else {
-			throw new EntityNotFound("멤버를 찾을 수 없습니다.");
+			throw new EntityNotFoundException("멤버를 찾을 수 없습니다.");
 		}
 	}
 	

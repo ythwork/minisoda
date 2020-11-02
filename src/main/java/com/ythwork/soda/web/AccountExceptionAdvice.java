@@ -1,6 +1,5 @@
 package com.ythwork.soda.web;
 
-import javax.security.auth.login.AccountNotFoundException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.ythwork.soda.exception.AccountAlreadyExistsException;
+import com.ythwork.soda.exception.AccountNotFoundException;
 
 @RestControllerAdvice
 public class AccountExceptionAdvice {

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
-import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.MemberAlreadyExistsException;
 import com.ythwork.soda.exception.MemberNotFoundException;
 import com.ythwork.soda.hateoas.MemberModelAssembler;
@@ -62,7 +62,7 @@ public class MemberController {
 		Member member = null;
 		try {
 			member = memberService.findById(id);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			throw new MemberNotFoundException(e.getMessage(), e);
 		}
 		return assembler.toModel(member);

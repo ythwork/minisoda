@@ -23,7 +23,7 @@ import com.ythwork.soda.dto.AccountInfo;
 import com.ythwork.soda.exception.AccountAlreadyExistsException;
 import com.ythwork.soda.exception.AccountNotFoundException;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
-import com.ythwork.soda.exception.EntityNotFound;
+import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.hateoas.AccountModelAssembler;
 import com.ythwork.soda.service.AccountService;
 
@@ -53,7 +53,7 @@ public class AccountController {
 		AccountInfo accountInfo = null;
 		try {
 			accountInfo = accountService.getAccountInfo(id);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			throw new AccountNotFoundException(e.getMessage(), e);
 		}
 		return assembler.toModel(accountInfo);
@@ -64,7 +64,7 @@ public class AccountController {
 		AccountInfo accountInfo = null;
 		try {
 			accountInfo = accountService.addAccountToBoard(accountAddInfo);
-		} catch(EntityNotFound e) {
+		} catch(EntityNotFoundException e) {
 			throw new AccountNotFoundException(e.getMessage(), e);
 		} catch(EntityAlreadyExistsException e) {
 			throw new AccountAlreadyExistsException(e.getMessage(), e);
