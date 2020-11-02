@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ythwork.soda.domain.Member;
+import com.ythwork.soda.dto.MemberAddInfo;
+import com.ythwork.soda.dto.MemberInfo;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
 import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.MemberAlreadyExistsException;
@@ -36,12 +37,12 @@ public class MemberController {
 	
 	// consumes는 Content-type : application/json 인 요청만 처리한다는 의미
 	@PostMapping(path="/register", consumes="application/json")
-	public ResponseEntity<?> registerMember(@RequestBody Member member) {
+	public ResponseEntity<?> registerMember(@RequestBody MemberAddInfo memberAddInfo) {
 		// @RequestBody : json -> Object
 		// 없으면 쿼리나 폼 매개변수와 바인딩한다고 간주
-		Member m = null;
+		MemberInfo m = null;
 		try {
-			m = memberService.register(member);
+			m = memberService.register(memberAddInfo);
 		} catch(EntityAlreadyExistsException e) {
 			// 예외 연쇄 기법
 			// repository와 service 계층의 에러를 web 계층의 예외로 감싼다.
@@ -49,7 +50,7 @@ public class MemberController {
 			throw new MemberAlreadyExistsException(e.getMessage(), e);
 		}
 		
-		EntityModel<Member> entityModel = assembler.toModel(m);
+		EntityModel<MemberInfo> entityModel = assembler.toModel(m);
 		/*
 		CREATED status
 		location header : given URI.
@@ -58,14 +59,14 @@ public class MemberController {
 	}
 	
 	@GetMapping("/{id}")
-	public EntityModel<Member> getMember(@PathVariable Long id) {
-		Member member = null;
+	public EntityModel<MemberInfo> getMember(@PathVariable Long id) {
+		MemberInfo memberInfo = null;
 		try {
-			member = memberService.findById(id);
+			memberInfo = memberService.getMemberInfoById(id);
 		} catch(EntityNotFoundException e) {
 			throw new MemberNotFoundException(e.getMessage(), e);
 		}
-		return assembler.toModel(member);
+		return assembler.toModel(memberInfo);
 	}
 	
 	@DeleteMapping("/{id}")

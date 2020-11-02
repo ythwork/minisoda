@@ -11,11 +11,11 @@ import com.ythwork.soda.data.BankcodeRepository;
 import com.ythwork.soda.data.OpenapiRepository;
 import com.ythwork.soda.domain.Address;
 import com.ythwork.soda.domain.Bankcode;
-import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.domain.Openapi;
 import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.dto.AccountAddInfo;
 import com.ythwork.soda.dto.AccountInfo;
+import com.ythwork.soda.dto.MemberAddInfo;
 import com.ythwork.soda.dto.TransactionAddInfo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +55,7 @@ public class TransactionServiceTests {
 	@Test
 	public void transferTest() {
 		// given
-		Member m = new Member();
+		MemberAddInfo m = new MemberAddInfo();
 		m.setFirstName("태환");
 		m.setLastName("양");
 		m.setPhoneNumber("01066496270");
@@ -89,10 +89,10 @@ public class TransactionServiceTests {
 		printAccountInfo("send", send);
 		printAccountInfo("recv", recv);
 		
-		AccountInfo sendAcntInfo = accountService.addAccountToBoard(new AccountAddInfo(m.getId(), "A BANK", "123-45-6789"));
+		AccountInfo sendAcntInfo = accountService.addAccountToBoard(new AccountAddInfo(m.getMemberId(), "A BANK", "123-45-6789"));
 		
 		//when
-		Transaction transaction = transactionService.createTransaction(new TransactionAddInfo(m.getId(), sendAcntInfo.getAccountId(), "B BANK", "987-65-4321", 10000L));
+		Transaction transaction = transactionService.createTransaction(new TransactionAddInfo(m.getMemberId(), sendAcntInfo.getAccountId(), "B BANK", "987-65-4321", 10000L));
 		
 		// pk인 id를 기준으로 하는 find()는 flush() 하지 않는다. 1차 캐시에서 엔티티를 찾을 수 있다.
 		// 쿼리 메서드를 구성해 find() 할 경우에는 JPQL을 구성해 데이터베이스를 조회한다.
