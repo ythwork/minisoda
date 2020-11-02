@@ -23,10 +23,14 @@ import com.ythwork.soda.domain.TransactionFilter;
 import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
 import com.ythwork.soda.exception.EntityNotFound;
-import com.ythwork.soda.exception.TransactionFailureException;
+import com.ythwork.soda.exception.NotEnoughBalanceException;
 
 @Service
-@Transactional
+// @Transactional은 unchecked exception = RuntimeException subclass에서만 롤백한다.
+// check exception도 롤백하고 싶다면 @Transactional(rollbackFor = Exception.class)라고 명시해야 한다.
+// unchecked exception 이지만 익셉션이 발생했을 때 발생 시점까지를 커밋하고 싶다면
+// @Transactional(noRollbackFor=NotEoughBalanceException.class)처럼 명시하면 된다.
+@Transactional(noRollbackFor=NotEnoughBalanceException.class)
 public class TransactionService {
 	@Autowired
 	private MemberService memberService;
@@ -62,15 +66,7 @@ public class TransactionService {
 		return newTransaction;
 	}
 	
-	public boolean transfer(Long transactionId) {
-		Optional<Transaction> optTransaction = transactionRepo.findById(transactionId);
-		Transaction transaction = null;
-		if(optTransaction.isPresent()) {
-			transaction = optTransaction.get();
-		} else {
-			return false;
-		}
-		
+	public Transaction transfer(Transaction transaction) {
 		Openapi send = transaction.getSend();
 		Openapi recv = transaction.getRecv();
 				
@@ -80,7 +76,8 @@ public class TransactionService {
 		
 		if(sendBalance - amount < 0) {
 			transaction.setTransactionStatus(TransactionStatus.FAILED);
-			throw new TransactionFailureException("잔고가 부족합니다.");
+			transaction.setAfterBalance(sendBalance - amount);
+			throw new NotEnoughBalanceException("잔고가 부족합니다.");
 		}
 		sendBalance -= amount;
 		recvBalance += amount;
@@ -108,14 +105,13 @@ public class TransactionService {
 		send.setBalance(sendBalance);
 		recv.setBalance(recvBalance);
 		
-		
 		Long afterBalance = sendBalance;
 		transaction.setAfterBalance(afterBalance);
 		transaction.setTransactionStatus(TransactionStatus.SUCCEEDED);
 		
 		// ----------- 업데이트 쿼리 종료 ----------------
-				
-		return true;
+		
+		return transaction;
 	}
 	
 	public void cancelTransaction(Long transactionId) {

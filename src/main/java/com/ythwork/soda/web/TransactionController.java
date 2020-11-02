@@ -8,6 +8,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ythwork.soda.domain.Transaction;
 import com.ythwork.soda.domain.TransactionFilter;
+import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
 import com.ythwork.soda.exception.EntityNotFound;
 import com.ythwork.soda.exception.InvalidTransactionInfoProvidedException;
+import com.ythwork.soda.exception.NotEnoughBalanceException;
 import com.ythwork.soda.exception.TransactionNotFoundException;
 import com.ythwork.soda.hateoas.TransactionModelAssembler;
 import com.ythwork.soda.service.TransactionService;
@@ -75,11 +81,53 @@ public class TransactionController {
 	
 	@PutMapping("/{id}/complete")
 	public ResponseEntity<?> complete(@PathVariable Long id) {
-		return null;
+		Transaction transaction = null;
+		try {
+			transaction = transactionService.findById(id);
+		} catch(EntityNotFound e) {
+			throw new TransactionNotFoundException(e.getMessage(), e);
+		}
+		
+		if(transaction.getTransactionStatus() == TransactionStatus.IN_PROCESS) {
+			try {
+				Transaction completedTransaction = transactionService.transfer(transaction);
+				return ResponseEntity.ok(assembler.toModel(completedTransaction));
+			} catch(NotEnoughBalanceException e) {
+				return ResponseEntity.badRequest().body(assembler.toModel(transaction));
+			}
+		}
+		
+		return ResponseEntity
+				.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+				// Problem : hypermedia-지원 에러 컨테이너 
+				.body(Problem
+						.create()
+						.withTitle("Method not allowed")
+						.withDetail("진행 중이 아닌 경우 송금할 수 없습니다. 현재 트랜잭션 상태는 " + transaction.getTransactionStatus() + "입니다."));
 	}
 	
 	@DeleteMapping("/{id}/cancel")
 	public ResponseEntity<?> cancel(@PathVariable Long id) {
-		return null;
+		Transaction transaction = null;
+		try {
+			transaction = transactionService.findById(id);
+		} catch(EntityNotFound e) {
+			throw new TransactionNotFoundException(e.getMessage(), e);
+		}
+		
+		if(transaction.getTransactionStatus() == TransactionStatus.IN_PROCESS) {
+			transactionService.deleteById(transaction.getId());
+			transaction.setTransactionStatus(TransactionStatus.CANCELED);
+			return ResponseEntity.ok(assembler.toModel(transaction));
+		}
+		
+		return ResponseEntity
+				.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+				.body(Problem
+						.create()
+						.withTitle("Method not allowed")
+						.withDetail("진행 중이 아닌 경우 취소할 수 없습니다. 현재 트랜잭션 상태는 " + transaction.getTransactionStatus() + "입니다."));
 	}
 }
