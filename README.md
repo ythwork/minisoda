@@ -69,5 +69,27 @@
     3. JPA를 처음 공부하면서 마이바티스로 동적 쿼리 만들면서 SQL을 사용하지 왜 한 계층을 더 두어 추상화하려는 걸까라고 생각한 적이 있습니다. 하지만 이제 JPA의 사용은 필수인 것 같습니다. 다양한 이점이 있겠지만 제 생각에 가장 큰 장점은 데이터베이스에 대한 의존성 제거와 1차 캐시를 통해 데이터베이스 접근 횟수를 줄임으로써 성능을 개선했다는 것입니다. 
 ---
 
+## 서비스
+  com.ythwork.soda.service
+  - 고려사항
+    1. 서비스 계층에서는 @Transactional에 대한 이해가 가장 중요하다고 생각합니다. 특히 스프링 컨테이너는 트랜잭션이 시작되면 퍼시스턴스 컨텍스트를 생성하고 트랜잭션이 끝나면 퍼시스턴스 컨텍스트를 삭제합니다. 이러한 지식이 없다면 JPQL이나 네이티브 SQL을 사용해 커스터마이징할 때 많은 혼란에 빠질 것 같습니다. 스프링 컨테이너가 관리하는 트랜잭션의 몇가지 특징은 다음과 같습니다.
+      - 웹 서비스의 기본적인 격리 수준은 READ COMMITTED으로 판단합니다. 이에 더해 @Version을 이용해 낙관적 락을 구현하거나 비관적 락을 통해 데이터베이스의 쓰기 락을 제공합니다.
+      - 기본적으로 트랜잭션 도중 다시 트랜잭션을 시작하면 부모의 트랜잭션에 통합됩니다. 
+      - 익셉션이 발생했을 때 uncheck exception 즉, RuntimeExeption의 서브클래스는 롤백됩니다. check exception은 롤백되지 않는데 rollbackFor=Exception.class를 설정하면 모두 롤백할 수 있습니다. 
+    2. 메서드 반환 타입을 엔티티 객체가 아니라 DTO 객체를 이용해 반환했습니다. REST API를 구성할 때 HATEOAS를 이용해 관련 링크를 붙여 EntityModel 객체를 반환했는데 curl로 테스트를 해보니 연관 객체 참조 때문에 JSON이 무한히 반복되는 현상을 발견했기 때문입니다. (좀 더 관례적인 사용법이 있을지도 모릅니다만 클라이언트에게 필요한 만큼의 데이터만 전달한다는 취지로 그대로 진행했습니다.)
+---
+
+## 웹 계층
+  com.ythwork.soda.web
+  - 고려사항
+    1. 예전에 REST API를 구성할 때는 단순히 ResponseEntity에서 상태코드와 바디를 설정해 클라이언트에 전달했습니다. 하지만 최근에는 하이퍼미디어를 사용해 반환되는 리소스에 관련된 하이퍼링크를 추가하는 HATEOAS(Hypermedia As The Engine Of Application State)를 활용하는 것 같습니다. 저도 최근 프로젝트에서는 hateoas를 도입해 작업하고 있습니다. 
+    2. 하이퍼링크를 추가하면 클라이언트는 URL을 하드코딩하지 않고 유연하게 로직을 처리할 수 있게 됩니다. 서버 쪽에서는 변경 사항이 있을 때 기존 URL을 변경할 수 있어 부담이 적습니다. 데이터와 함께 링크를 가지고 있는 EntityModel 객체를 생성하는 것이 가장 중요한 부분인데 이때는 RepresentationModelAssembler<MemberInfo, EntityModel<MemberInfo>>에 있는 toModel()을 오버라이딩해서 엔티티 객체를 EntityModel 객체로 변환할 assembler 클래스를 만들고 @Component를 붙여 스프링 빈으로 만들어둡니다. 이후 의존성 주입을 통해 컨트롤러에서 사용하게 됩니다. 
+    3. EntityModel에 링크를 붙일 때는 linkTo()와 methodOn()을 사용합니다. 사용예는 다음과 같습니다. 
+      - return EntityModel.of(accountInfo, 
+				linkTo(methodOn(AccountController.class).getAccount(accountInfo.getAccountId())).withSelfRel(),
+				linkTo(methodOn(AccountController.class).allAccounts()).withRel("accounts"));
+    4. EntityModel의 컬렉션은 컬렉션을 추상화한 CollectionModel 객체를 사용합니다. 사용예는 EntityModel과 매우 유사합니다.
+    5. 
+
 
     
