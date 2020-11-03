@@ -89,7 +89,7 @@
 				linkTo(methodOn(AccountController.class).getAccount(accountInfo.getAccountId())).withSelfRel(),
 				linkTo(methodOn(AccountController.class).allAccounts()).withRel("accounts"));
     4. EntityModel의 컬렉션은 컬렉션을 추상화한 CollectionModel 객체를 사용합니다. 사용예는 EntityModel과 매우 유사합니다.
-    5. 
+    5. 이러한 형태의 HATEOAS를 HAL(Hypertext Application Language)이라고 하는데 이를 이용하면 api를 반환받은 클라이언트가 다음에 어떤 행동을 취해야 하는지 오류 없이 안내할 수 있습니다. 예를 들어보겠습니다. TransactionController를 보면 송금 거래내역인 Transaction은 POST 메서드로 /transaction을 요청하면 만들어집니다. 이때 TransactionStatus는 IN_PROCESS로 설정됩니다. 이때 반환되는 json을 보면 IN_PROCESS일 때 송금을 완료하는 경우와 송금을 취소하는 경우의 링크를 전달해 클라이언트가 다음 행동을 할 수 있도록 도와줍니다. 만약 TransactionStatus가 COMPLETE나 FAILED일 경우에는 자신의 트랜잭션을 확인할 수 있는 링크와 전체 트랜잭션을 보는 링크만 전달됩니다. 클라이언트는 현재 상황에서 허락되어지지 않는 상태로 가지 않고 결정할 수 있는 다음 행동들에 대해 옵션이 주어지는 것입니다. 만약 허락되어지지 않은 상태로 가려하면 어떤 이유로 안되는지에 대한 메시지를 전달합니다.
 
 
     
