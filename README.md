@@ -95,8 +95,209 @@
 
 ## curl test 결과
   실제 작동 여부를 curl을 통해 확인해보았습니다. 아래는 몇가지 결과를 정리한 것입니다. 
+### 회원 등록
+  - request
+    - curl -vX POST localhost:8080/member/register -H 'Content-type:application/json' -d '{"firstName" : "영실", "lastName" : "장", "address" : {"country" : "대한민국", "province" : "경기도", "city" : "한양시", "street" : "동대문길", "houseNumber" : "123"}, "phoneNumber" : "01022223333", "email" : "youngsil@gmail.com"}
+  - response
+    - HTTP/1.1 201
+    - Location: http://localhost:8080/member/15
+    - {"fullName":"장영실","address":{"country":"대한민국","province":"경기도","city":"한양시","street":"동대문길","houseNumber":"123"},"phoneNumber":"01022223333","email":"youngsil@gmail.com","memberId":15,"_links":{"self":{"href":"http://localhost:8080/member/15"}}}
   
-  
+### 회원 조회
+  - request
+    - curl -v localhost:8080/member/15 | json_pp
+  - response
+    - HTTP/1.1 200
+    - {
+   "phoneNumber" : "01022223333",
+   "memberId" : 15,
+   "email" : "youngsil@gmail.com",
+   "address" : {
+      "street" : "동대문길",
+      "country" : "대한민국",
+      "province" : "경기도",
+      "city" : "한양시",
+      "houseNumber" : "123"
+   },
+   "_links" : {
+      "self" : {
+         "href" : "http://localhost:8080/member/15"
+      }
+   },
+   "fullName" : "장영실"
+}
+
+### 회원 탈퇴
+  - request
+    - curl -vX DELETE localhost:8080/member/15 | json_pp
+  -response
+    - HTTP/1.1 204
+    
+### 계좌 등록
+  - request
+    - curl -vX POST localhost:8080/account -H 'Content-type:application/json' -d '{"memberId" : "11", "code" : "A BANK", "accountNumber" : "123-45-6789"}'
+  - response
+    - Location: http://localhost:8080/account/1
+    - {"owner":"양태환","bankcode":"A BANK","accountNumber":"123-45-6789","balance":50000,"accountId":1,"_links":{"self":{"href":"http://localhost:8080/account/1"},"accounts":{"href":"http://localhost:8080/account"}}}
+    
+### 계좌 조회
+  - request
+    - curl -v localhost:8080/account/1
+  - response
+    - {"owner":"양태환","bankcode":"A BANK","accountNumber":"123-45-6789","balance":50000,"accountId":1,"_links":{"self":{"href":"http://localhost:8080/account/1"},"accounts":{"href":"http://localhost:8080/account"}}}
+    
+### 계좌 목록 조회
+  - request
+    - curl -v localhost:8080/account | json_pp
+  - response
+    - {
+   "_embedded" : {
+      "accountInfoList" : [
+         {
+            "accountId" : 1,
+            "_links" : {
+               "accounts" : {
+                  "href" : "http://localhost:8080/account"
+               },
+               "self" : {
+                  "href" : "http://localhost:8080/account/1"
+               }
+            },
+            "balance" : 50000,
+            "owner" : "양태환",
+            "accountNumber" : "123-45-6789",
+            "bankcode" : "A BANK"
+         },
+         {
+            "_links" : {
+               "accounts" : {
+                  "href" : "http://localhost:8080/account"
+               },
+               "self" : {
+                  "href" : "http://localhost:8080/account/2"
+               }
+            },
+            "accountId" : 2,
+            "owner" : "양태환",
+            "balance" : 20000,
+            "bankcode" : "B BANK",
+            "accountNumber" : "111-22-3333"
+         },
+         {
+            "_links" : {
+               "self" : {
+                  "href" : "http://localhost:8080/account/3"
+               },
+               "accounts" : {
+                  "href" : "http://localhost:8080/account"
+               }
+            },
+            "accountId" : 3,
+            "bankcode" : "C BANK",
+            "accountNumber" : "222-33-4321",
+            "owner" : "양태환",
+            "balance" : 10000
+         }
+      ]
+   },
+   "_links" : {
+      "self" : {
+         "href" : "http://localhost:8080/account"
+      }
+   }
+}
+
+### 계좌 삭제
+  - request
+    - curl -vX DELETE localhost:8080/account/3
+  - response
+    - HTTP/1.1 204
+ 
+### 거래 내역 생성
+  - request
+    - curl -vX POST localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "11", "sendAcntId" : "1", "recvcode" : "A BANK", "recvAcntNum" : "333-44-1234", "amount" : "5000"}'
+  - response
+    - {"memberId":11,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"A BANK","recvAcntNum":"333-44-1234","amount":5000,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-02T11:16:23.568+00:00","transactionId":9,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/9"},"complete":{"href":"http://localhost:8080/transaction/9/complete"},"cancel":{"href":"http://localhost:8080/transaction/9/cancel"}}}
+    
+### 거래 내역 검색 - Case 1.  거래내역 상태가 IN_PROCESS일 때 
+  - request
+    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "IN_PROCESS", "amount" : ""}'
+  - response
+    - {"_embedded":{"transactionInfoList":[{"memberId":11,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"A BANK","recvAcntNum":"333-44-1234","amount":5000,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-02T11:16:23.000+00:00","transactionId":9,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/9"},"complete":{"href":"http://localhost:8080/transaction/9/complete"},"cancel":{"href":"http://localhost:8080/transaction/9/cancel"}}},{"memberId":11,"sendcode":"B BANK","sendAcntNum":"111-22-3333","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":500,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-02T11:19:41.000+00:00","transactionId":10,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/10"},"complete":{"href":"http://localhost:8080/transaction/10/complete"},"cancel":{"href":"http://localhost:8080/transaction/10/cancel"}}},{"memberId":12,"sendcode":"A BANK","sendAcntNum":"333-44-1234","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":7000,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-02T11:25:24.000+00:00","transactionId":11,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/11"},"complete":{"href":"http://localhost:8080/transaction/11/complete"},"cancel":{"href":"http://localhost:8080/transaction/11/cancel"}}}]},"_links":{"self":{"href":"http://localhost:8080/transaction"}}}
+    
+### 거래 내역 검색 - Case 2.  거래 내역 상태가 SUCCEEDED일 때
+  - request
+    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "SUCCEEDED", "amount" : ""}' | json_pp
+  - response
+    - {
+   "_links" : {
+      "self" : {
+         "href" : "http://localhost:8080/transaction"
+      }
+   },
+   "_embedded" : {
+      "transactionInfoList" : [
+         {
+            "processAt" : "2020-11-02T11:19:41.000+00:00",
+            "transactionId" : 10,
+            "transactionStatus" : "SUCCEEDED",
+            "_links" : {
+               "self" : {
+                  "href" : "http://localhost:8080/transaction/10"
+               },
+               "transactions" : {
+                  "href" : "http://localhost:8080/transaction"
+               }
+            },
+            "recvAcntNum" : "222-33-4321",
+            "amount" : 500,
+            "memberId" : 11,
+            "afterBalance" : 19500,
+            "recvcode" : "B BANK",
+            "sendcode" : "B BANK",
+            "sendAcntNum" : "111-22-3333"
+         }
+      ]
+   }
+}
+
+### 거래 내역 검색 - Case 3. 거래 내역 상태가 FAILED 일 때
+  - request
+    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "FAILED", "amount" : ""}' | json_pp
+  - response
+    - {
+   "_links" : {
+      "self" : {
+         "href" : "http://localhost:8080/transaction"
+      }
+   },
+   "_embedded" : {
+      "transactionInfoList" : [
+         {
+            "memberId" : 11,
+            "_links" : {
+               "transactions" : {
+                  "href" : "http://localhost:8080/transaction"
+               },
+               "self" : {
+                  "href" : "http://localhost:8080/transaction/13"
+               }
+            },
+            "processAt" : "2020-11-02T14:22:00.000+00:00",
+            "afterBalance" : -20000,
+            "transactionId" : 13,
+            "amount" : 70000,
+            "sendAcntNum" : "123-45-6789",
+            "transactionStatus" : "FAILED",
+            "sendcode" : "A BANK",
+            "recvcode" : "B BANK",
+            "recvAcntNum" : "111-22-3333"
+         }
+      ]
+   }
+}
+
+### 
 
 
     
