@@ -297,7 +297,56 @@
    }
 }
 
-### 
+### 거래 내역 1건 조회
+  - request
+    - curl -v localhost:8080/transaction/9 | json_pp
+  - response
+    - {
+   "recvAcntNum" : "333-44-1234",
+   "memberId" : 11,
+   "amount" : 5000,
+   "transactionId" : 9,
+   "afterBalance" : 0,
+   "transactionStatus" : "IN_PROCESS",
+   "sendcode" : "A BANK",
+   "sendAcntNum" : "123-45-6789",
+   "_links" : {
+      "complete" : {
+         "href" : "http://localhost:8080/transaction/9/complete"
+      },
+      "transactions" : {
+         "href" : "http://localhost:8080/transaction"
+      },
+      "self" : {
+         "href" : "http://localhost:8080/transaction/9"
+      },
+      "cancel" : {
+         "href" : "http://localhost:8080/transaction/9/cancel"
+      }
+   },
+   "processAt" : "2020-11-02T11:16:23.000+00:00",
+   "recvcode" : "A BANK"
+}
+
+### 송금 완료
+  - request
+    - curl -vX PUT localhost:8080/transaction/10/complete
+  - response
+    - {"memberId":11,"sendcode":"B BANK","sendAcntNum":"111-22-3333","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":500,"afterBalance":19500,"transactionStatus":"SUCCEEDED","processAt":"2020-11-02T11:19:41.000+00:00","transactionId":10,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/10"}}}
+    
+### 송금 취소
+  - request
+    - curl -vX DELETE localhost:8080/transaction/11/cancel
+  -response
+    - {"memberId":12,"sendcode":"A BANK","sendAcntNum":"333-44-1234","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":7000,"afterBalance":0,"transactionStatus":"CANCELED","processAt":"2020-11-02T11:25:24.000+00:00","transactionId":11,"_links":{"transactions":{"href":"http://localhost:8080/transaction"}}}
+    
+### 송금 실패
+  - request
+    - curl -vX PUT localhost:8080/transaction/13/complete
+  - response
+    - {"memberId":11,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"B BANK","recvAcntNum":"111-22-3333","amount":70000,"afterBalance":-20000,"transactionStatus":"FAILED","processAt":"2020-11-02T14:22:00.000+00:00","transactionId":13,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/13"}}}
+---
+
 
 
     
