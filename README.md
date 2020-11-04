@@ -130,7 +130,7 @@
 ### 회원 탈퇴
   - request
     - curl -vX DELETE localhost:8080/member/15 | json_pp
-  -response
+  - response
     - HTTP/1.1 204
     
 ### 계좌 등록
