@@ -337,7 +337,7 @@
 ### 송금 취소
   - request
     - curl -vX DELETE localhost:8080/transaction/11/cancel
-  -response
+  - response
     - {"memberId":12,"sendcode":"A BANK","sendAcntNum":"333-44-1234","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":7000,"afterBalance":0,"transactionStatus":"CANCELED","processAt":"2020-11-02T11:25:24.000+00:00","transactionId":11,"_links":{"transactions":{"href":"http://localhost:8080/transaction"}}}
     
 ### 송금 실패
