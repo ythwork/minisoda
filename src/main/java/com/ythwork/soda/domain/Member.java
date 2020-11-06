@@ -1,7 +1,9 @@
 package com.ythwork.soda.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -10,6 +12,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import lombok.Getter;
@@ -39,6 +44,9 @@ public class Member {
 	@Embedded
 	private Address address;
 	
+	@Embedded
+	private Auth auth;
+	
 	@Column(name="phone_number")
 	private String phoneNumber;
 	
@@ -50,5 +58,11 @@ public class Member {
 	
 	@OneToMany(mappedBy = "member", fetch=FetchType.LAZY)
 	private List<Transaction> transactions = new ArrayList<>();
+	
+	@ManyToMany(fetch=FetchType.LAZY)
+	@JoinTable(name="member_roles",
+			joinColumns=@JoinColumn(name="member_id"),
+			inverseJoinColumns=@JoinColumn(name="role_id"))
+	private Set<Role> roles = new HashSet<>();
 	
 }

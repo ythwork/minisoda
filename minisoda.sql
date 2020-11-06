@@ -9,9 +9,14 @@ CREATE TABLE member (
 		city VARCHAR(20) NOT NULL, 
 		street VARCHAR(20) NOT NULL, 
 		house_number INT, 
+		username VARCHAR(20) NOT NULL,
+		password VARCHAR(512) NOT NULL,
 		phone_number VARCHAR(11) NOT NULL, 
 		email VARCHAR(200) NOT NULL, 
 		PRIMARY KEY(member_id));
+
+ALTER TABLE member
+		ADD INDEX ix_username(username);
 
 ALTER TABLE member
 		ADD INDEX ix_email(email);
@@ -63,6 +68,17 @@ CREATE TABLE transaction (
 ALTER TABLE transaction
 	ADD INDEX ix_process_at(process_at);
 
+CREATE TABLE role (
+		role_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		rolename VARCHAR(50) NOT NULL);
+
+CREATE TABLE member_role (
+		member_role_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		member_id INT NOT NULL,
+		role_id INT NOT NULL,
+		CONSTRAINT fk_member FOREIGN KEY(member_id) REFERENCES member(member_id),
+		CONSTRAINT fk_roles FOREIGN KEY(role_id) REFERENCES role(role_id));
+
 INSERT INTO bankcode (code)
 	VALUES
 	('A BANK'),
@@ -77,7 +93,7 @@ INSERT INTO openapi (bankcode_id, account_number, owner, balance)
 	(1, '333-44-1234', "이순신", 30000),
 	(2, '222-33-4321', "장영실", 500);
 
-INSERT INTO member (first_name, last_name, country, province, city, street, house_number, phone_number, email) 
-	VALUES 
-	("태환", "양", "대한민국", "경기도", "군포시", "산본천로", "214", "01066496270", "ythwork@naver.com"),  
-	("순신", "이", "대한민국", "경기도", "한양시", "육전거리", "111", "01011111234", "sunsin@gmail.com");
+INSERT INTO role (rolename)
+	VALUES
+	('ROLE_USER'),
+	('ROLE_ADMIN');

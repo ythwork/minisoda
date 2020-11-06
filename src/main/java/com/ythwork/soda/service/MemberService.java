@@ -30,7 +30,7 @@ public class MemberService {
 		member.setPhoneNumber(memberAddInfo.getPhoneNumber());
 		member.setEmail(memberAddInfo.getEmail());
 		
-		if(alreadyMember(member)) {
+		if(alreadyMemberByUsername(member) || alreadyMemberByEmail(member)) {
 			throw new EntityAlreadyExistsException(member.getLastName() + member.getFirstName() + " 님은 이미 가입한 회원입니다.");
 		}
 		Member newMember =  memberRepo.save(member);
@@ -38,8 +38,14 @@ public class MemberService {
 		return fromMemberToMemberInfo(newMember);
 	}
 	
-	// 회원 중복 가입 방지
-	private boolean alreadyMember(Member member) {
+	// 회원 중복 가입 방지 1
+	private boolean alreadyMemberByUsername(Member member) {
+		Member m = memberRepo.findByUsername(member.getAuth().getUsername());
+		return m != null ? true : false;
+	}
+	
+	// 회원 중복 가입 방지 2
+	private boolean alreadyMemberByEmail(Member member) {
 		Member m = memberRepo.findByEmail(member.getEmail());
 		return m != null ? true : false;
 	}
