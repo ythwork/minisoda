@@ -13,7 +13,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtManager {
 	@Value("${jpa.jwt.secret}")
@@ -23,7 +25,6 @@ public class JwtManager {
 	
 	public String getToken(Authentication authentication) {
 		UserDetailsImpl principal = (UserDetailsImpl)authentication.getPrincipal();
-		
 		return Jwts.builder()
 				.setSubject(principal.getUsername())
 				.setIssuedAt(new Date())

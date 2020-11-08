@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import lombok.Getter;
@@ -25,6 +26,9 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
+@NamedQuery(
+		name="Member.findByUsername",
+		query="select m from Member m where m.auth.username = :username")
 public class Member {
 	
 	@Id
@@ -61,7 +65,7 @@ public class Member {
 	
 	// 연관 관계 객체 참조 추가는 언제 해야 하는가?
 	@ManyToMany(fetch=FetchType.LAZY)
-	@JoinTable(name="member_roles",
+	@JoinTable(name="member_role",
 			joinColumns=@JoinColumn(name="member_id"),
 			inverseJoinColumns=@JoinColumn(name="role_id"))
 	private Set<Role> roles = new HashSet<>();

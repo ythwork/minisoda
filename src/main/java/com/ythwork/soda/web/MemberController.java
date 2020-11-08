@@ -1,7 +1,11 @@
 package com.ythwork.soda.web;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -39,7 +43,8 @@ public class MemberController {
 	private final JwtManager jwtManager;
 	private final JwtResponseAssembler jwtAssembler;
 	
-	public MemberController(MemberService memberService, MemberModelAssembler assembler, JwtManager jwtManager, JwtResponseAssembler jwtAssembler) {
+	public MemberController(MemberService memberService, MemberModelAssembler assembler, 
+							JwtManager jwtManager, JwtResponseAssembler jwtAssembler) {
 		this.memberService = memberService;
 		this.assembler = assembler;
 		this.jwtManager = jwtManager;
@@ -48,7 +53,7 @@ public class MemberController {
 	
 	// consumes는 Content-type : application/json 인 요청만 처리한다는 의미
 	@PostMapping(path="/register", consumes="application/json")
-	public ResponseEntity<?> registerMember(@RequestBody MemberAddInfo memberAddInfo) {
+	public ResponseEntity<?> registerMember(@RequestBody MemberAddInfo memberAddInfo, HttpServletRequest request) throws URISyntaxException {
 		// @RequestBody : json -> Object
 		// 없으면 쿼리나 폼 매개변수와 바인딩한다고 간주
 		MemberInfo m = null;
@@ -66,7 +71,9 @@ public class MemberController {
 		CREATED status
 		location header : given URI.
 		*/
-		return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
+		
+		String loginUri = request.getRequestURL().toString().replace("register", "login");
+		return ResponseEntity.created(new URI(loginUri)).body(entityModel);
 	}
 	
 	@PostMapping("/login")

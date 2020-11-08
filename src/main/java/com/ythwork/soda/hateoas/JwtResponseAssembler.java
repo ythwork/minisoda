@@ -5,10 +5,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
 import com.ythwork.soda.dto.LoginResponse;
 import com.ythwork.soda.web.MemberController;
 
+@Component
 public class JwtResponseAssembler implements RepresentationModelAssembler<LoginResponse, EntityModel<LoginResponse>> {
 
 	@Override

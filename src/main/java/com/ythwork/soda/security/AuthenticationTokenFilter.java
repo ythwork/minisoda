@@ -31,7 +31,7 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		// jwt 토큰이 있다면 헤더에서 받아온다.
 		// 없으면 request.getHeader()는 null을 반환한다.
-		String tokenHeader = request.getHeader("Authorization");
+		String tokenHeader = request.getHeader("Authorization");		
 		String token = null;
 		if(tokenHeader!= null && tokenHeader.startsWith("Bearer")) {
 			token = tokenHeader.substring(7);
@@ -53,7 +53,7 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			
 			} catch(JwtAuthenticationException e) {
-				log.error("요청 헤더의 JWT는 유효하지 않습니다.");
+				log.error(e.getMessage());
 			}
 		}
 		
