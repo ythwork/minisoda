@@ -34,12 +34,12 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 			// 검증된 멤버라면 authentication을 만들어서 
 			// 시큐리티 컨텍스트에 대입한다. 
 			String username = jwtManager.getUsername(request);
-			UserDetails details = userDetailsService.loadUserByUsername(username);
+			UserDetails member = userDetailsService.loadUserByUsername(username);
 			
 			// Authentication implementation
 			UsernamePasswordAuthenticationToken authentication = 
 					new UsernamePasswordAuthenticationToken(
-							details, null, details.getAuthorities());
+							member, null, member.getAuthorities());
 			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			
 			SecurityContextHolder.getContext().setAuthentication(authentication);

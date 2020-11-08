@@ -1,7 +1,11 @@
 package com.ythwork.soda.domain;
 
+import java.util.Collection;
+
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,4 +22,6 @@ public class Auth {
 	private String username;
 	@NotNull
 	private String password;
+	
+	private Collection<? extends GrantedAuthority> authorities;
 }

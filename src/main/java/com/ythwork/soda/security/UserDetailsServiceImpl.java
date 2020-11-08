@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			throw new EntityNotFoundException("멤버를 찾을 수 없습니다.");
 		}
 		
-		return UserDetailsImpl.createUserDetails(member);
+		return member;
 	}
 
 }

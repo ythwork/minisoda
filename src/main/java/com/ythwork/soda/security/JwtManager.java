@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.exception.JwtAuthenticationException;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,13 +27,27 @@ public class JwtManager {
 	private Long expiration;
 	
 	public String getToken(Authentication authentication) {
-		UserDetailsImpl principal = (UserDetailsImpl)authentication.getPrincipal();
+		Member member = (Member)authentication.getPrincipal();
 		return Jwts.builder()
-				.setSubject(principal.getUsername())
+				.setSubject(member.getAuth().getUsername())
+				.claim("memberId", member.getId())
 				.setIssuedAt(new Date())
 				.setExpiration(new Date((new Date()).getTime() + expiration))
 				.signWith(SignatureAlgorithm.HS512, secretKey)
 				.compact();
+	}
+	
+	private Long getMemberId(String token) {
+		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("memberId", Long.class);
+	}
+	
+	public Long getMemberId(HttpServletRequest request) {
+		String jwt = getJwtFromRequestHeader(request);
+		if(jwt==null) {
+			throw new JwtAuthenticationException("요청 헤더에 JWT가 없습니다.");
+		}
+		
+		return getMemberId(jwt);
 	}
 	
 	private String getUsername(String token) {

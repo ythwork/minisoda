@@ -106,8 +106,8 @@ public class MemberController {
 		} catch(EntityNotFoundException e) {
 			throw new MemberNotFoundException(e.getMessage(), e);
 		}
-		String username = jwtManager.getUsername(request);
-		if(memberService.getMemberInfoByUsername(username).getMemberId() != memberInfo.getMemberId()) {
+		Long jwtMemberId = jwtManager.getMemberId(request);
+		if( jwtMemberId != memberInfo.getMemberId()) {
 			throw new NotAllowedMemberException("멤버 자신의 정보에만 접근이 가능합니다.");
 		}
 		
@@ -116,8 +116,8 @@ public class MemberController {
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteMember(@PathVariable Long id, HttpServletRequest request) {
-		String username = jwtManager.getUsername(request);
-		if(memberService.getMemberInfoByUsername(username).getMemberId() != memberService.getMemberInfoById(id).getMemberId()) {
+		Long jwtMemberId = jwtManager.getMemberId(request);
+		if( jwtMemberId != id) {
 			throw new NotAllowedMemberException("멤버 자신의 정보에만 접근이 가능합니다.");
 		}
 		
