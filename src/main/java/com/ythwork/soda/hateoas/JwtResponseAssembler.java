@@ -16,7 +16,7 @@ public class JwtResponseAssembler implements RepresentationModelAssembler<LoginR
 	@Override
 	public EntityModel<LoginResponse> toModel(LoginResponse jwtResponse) {
 		return EntityModel.of(jwtResponse, 
-				linkTo(methodOn(MemberController.class).getMember(jwtResponse.getMemberInfo().getMemberId())).withRel("member"));
+				linkTo(methodOn(MemberController.class).getMember(jwtResponse.getMemberInfo().getMemberId(), null)).withRel("member"));
 	}
 
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.ythwork.soda.exception.MemberAlreadyExistsException;
 import com.ythwork.soda.exception.MemberNotFoundException;
+import com.ythwork.soda.exception.NotAllowedMemberException;
 
 @RestControllerAdvice
 public class MemberExceptionAdvice {
@@ -20,6 +21,12 @@ public class MemberExceptionAdvice {
 	@ExceptionHandler(MemberNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	String memberNotFoundHandler(MemberNotFoundException e) {
+		return e.getMessage();
+	}
+	
+	@ExceptionHandler(NotAllowedMemberException.class)
+	@ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+	String notAllowedHandler(NotAllowedMemberException e) {
 		return e.getMessage();
 	}
 }

@@ -29,32 +29,23 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		// jwt 토큰이 있다면 헤더에서 받아온다.
-		// 없으면 request.getHeader()는 null을 반환한다.
-		String tokenHeader = request.getHeader("Authorization");		
-		String token = null;
-		if(tokenHeader!= null && tokenHeader.startsWith("Bearer")) {
-			token = tokenHeader.substring(7);
-			try {
-				// jwt 검증
-				jwtManager.validateToken(token);
-				
-				// 검증된 멤버라면 authentication을 만들어서 
-				// 시큐리티 컨텍스트에 대입한다. 
-				String username = jwtManager.getUsername(token);
-				UserDetails details = userDetailsService.loadUserByUsername(username);
-				
-				// Authentication implementation
-				UsernamePasswordAuthenticationToken authentication = 
-						new UsernamePasswordAuthenticationToken(
-								details, null, details.getAuthorities());
-				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				
-				SecurityContextHolder.getContext().setAuthentication(authentication);
+		try {
+			jwtManager.validateToken(request);
+			// 검증된 멤버라면 authentication을 만들어서 
+			// 시큐리티 컨텍스트에 대입한다. 
+			String username = jwtManager.getUsername(request);
+			UserDetails details = userDetailsService.loadUserByUsername(username);
 			
-			} catch(JwtAuthenticationException e) {
-				log.error(e.getMessage());
-			}
+			// Authentication implementation
+			UsernamePasswordAuthenticationToken authentication = 
+					new UsernamePasswordAuthenticationToken(
+							details, null, details.getAuthorities());
+			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		
+		} catch(JwtAuthenticationException e) {
+			log.error(e.getMessage());
 		}
 		
 		filterChain.doFilter(request, response);

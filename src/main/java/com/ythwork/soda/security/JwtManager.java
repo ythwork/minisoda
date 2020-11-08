@@ -2,6 +2,8 @@ package com.ythwork.soda.security;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -33,11 +35,20 @@ public class JwtManager {
 				.compact();
 	}
 	
-	public String getUsername(String token) {
+	private String getUsername(String token) {
 		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
 	}
 	
-	public void validateToken(String token) {
+	public String getUsername(HttpServletRequest request) {
+		String jwt = getJwtFromRequestHeader(request);
+		if(jwt==null) {
+			throw new JwtAuthenticationException("요청 헤더에 JWT가 없습니다.");
+		}
+		
+		return getUsername(jwt);
+	}
+	
+	private void validateToken(String token) {
 		try {
 			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
 		} catch(IllegalArgumentException e) {
@@ -49,6 +60,30 @@ public class JwtManager {
 		} catch(SignatureException e) {
 			throw new JwtAuthenticationException("JWT 서명이 잘못되었습니다.");
 		}
+	}
+	
+	public void validateToken(HttpServletRequest request) {
+		String jwt = getJwtFromRequestHeader(request);
+		if(jwt == null) {
+			throw new JwtAuthenticationException("요청 헤더에 JWT가 없습니다.");
+		}
+		
+		try {
+			validateToken(jwt);
+		} catch(JwtAuthenticationException e) {
+			throw e;
+		}
+	}
+	
+	public String getJwtFromRequestHeader(HttpServletRequest request) {
+		// jwt 토큰이 있다면 헤더에서 받아온다.
+		// 없으면 request.getHeader()는 null을 반환한다.
+		String tokenHeader = request.getHeader("Authorization");		
+		String token = null;
+		if(tokenHeader!= null && tokenHeader.startsWith("Bearer")) {
+			token = tokenHeader.substring(7);
+		}
+		return token;		
 	}
 	
 }

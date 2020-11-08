@@ -27,6 +27,7 @@ import com.ythwork.soda.exception.EntityNotFoundException;
 import com.ythwork.soda.exception.LoginFailureException;
 import com.ythwork.soda.exception.MemberAlreadyExistsException;
 import com.ythwork.soda.exception.MemberNotFoundException;
+import com.ythwork.soda.exception.NotAllowedMemberException;
 import com.ythwork.soda.hateoas.JwtResponseAssembler;
 import com.ythwork.soda.hateoas.MemberModelAssembler;
 import com.ythwork.soda.security.JwtManager;
@@ -98,18 +99,28 @@ public class MemberController {
 	}
 	
 	@GetMapping("/{id}")
-	public EntityModel<MemberInfo> getMember(@PathVariable Long id) {
+	public EntityModel<MemberInfo> getMember(@PathVariable Long id, HttpServletRequest request) {
 		MemberInfo memberInfo = null;
 		try {
 			memberInfo = memberService.getMemberInfoById(id);
 		} catch(EntityNotFoundException e) {
 			throw new MemberNotFoundException(e.getMessage(), e);
 		}
+		String username = jwtManager.getUsername(request);
+		if(memberService.getMemberInfoByUsername(username).getMemberId() != memberInfo.getMemberId()) {
+			throw new NotAllowedMemberException("멤버 자신의 정보에만 접근이 가능합니다.");
+		}
+		
 		return assembler.toModel(memberInfo);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteMember(@PathVariable Long id) {
+	public ResponseEntity<?> deleteMember(@PathVariable Long id, HttpServletRequest request) {
+		String username = jwtManager.getUsername(request);
+		if(memberService.getMemberInfoByUsername(username).getMemberId() != memberService.getMemberInfoById(id).getMemberId()) {
+			throw new NotAllowedMemberException("멤버 자신의 정보에만 접근이 가능합니다.");
+		}
+		
 		memberService.deleteById(id);
 		// DRI 설정으로 Member가 삭제되면 그와 연관된 Account와 Transaction 로우 모두 삭제
 		return ResponseEntity.noContent().build();
