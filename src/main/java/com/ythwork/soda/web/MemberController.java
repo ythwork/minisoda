@@ -3,6 +3,8 @@ package com.ythwork.soda.web;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +14,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ythwork.soda.dto.LoginRequest;
+import com.ythwork.soda.dto.LoginResponse;
 import com.ythwork.soda.dto.MemberAddInfo;
 import com.ythwork.soda.dto.MemberInfo;
 import com.ythwork.soda.exception.EntityAlreadyExistsException;
 import com.ythwork.soda.exception.EntityNotFoundException;
+import com.ythwork.soda.exception.LoginFailureException;
 import com.ythwork.soda.exception.MemberAlreadyExistsException;
 import com.ythwork.soda.exception.MemberNotFoundException;
+import com.ythwork.soda.hateoas.JwtResponseAssembler;
 import com.ythwork.soda.hateoas.MemberModelAssembler;
+import com.ythwork.soda.security.JwtManager;
 import com.ythwork.soda.service.MemberService;
 
 @RestController
@@ -29,10 +36,14 @@ import com.ythwork.soda.service.MemberService;
 public class MemberController {
 	private final MemberService memberService;
 	private final MemberModelAssembler assembler;
+	private final JwtManager jwtManager;
+	private final JwtResponseAssembler jwtAssembler;
 	
-	public MemberController(MemberService memberService, MemberModelAssembler assembler) {
+	public MemberController(MemberService memberService, MemberModelAssembler assembler, JwtManager jwtManager, JwtResponseAssembler jwtAssembler) {
 		this.memberService = memberService;
 		this.assembler = assembler;
+		this.jwtManager = jwtManager;
+		this.jwtAssembler = jwtAssembler;
 	}
 	
 	// consumes는 Content-type : application/json 인 요청만 처리한다는 의미
@@ -56,6 +67,27 @@ public class MemberController {
 		location header : given URI.
 		*/
 		return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
+	}
+	
+	@PostMapping("/login")
+	public EntityModel<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+		Authentication authentication = null;
+		try {
+			authentication = memberService.authenticate(loginRequest);
+		} catch(AuthenticationException e) {
+			throw new LoginFailureException(e.getMessage(), e);
+		}
+		
+		String token = jwtManager.getToken(authentication);
+		MemberInfo memberInfo = null;
+		try {
+			memberInfo = memberService.getMemberInfoByUsername(loginRequest.getUsername());
+		} catch(EntityNotFoundException e) {
+			throw new MemberNotFoundException(e.getMessage(), e);
+		}
+		LoginResponse jwtResponse = new LoginResponse(token, memberInfo);
+		
+		return jwtAssembler.toModel(jwtResponse);
 	}
 	
 	@GetMapping("/{id}")

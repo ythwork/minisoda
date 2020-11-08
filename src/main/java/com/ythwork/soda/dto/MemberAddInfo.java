@@ -1,5 +1,7 @@
 package com.ythwork.soda.dto;
 
+import java.util.Set;
+
 import com.ythwork.soda.domain.Address;
 
 import lombok.AllArgsConstructor;
@@ -17,5 +19,10 @@ public class MemberAddInfo {
 	private Address address;
 	private String phoneNumber;
 	private String email;
-	private Long memberId;
+	
+	// security
+	private String username;
+	private String password;
+	
+	Set<String> roles;
 }

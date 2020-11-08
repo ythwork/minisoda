@@ -59,6 +59,7 @@ public class Member {
 	@OneToMany(mappedBy = "member", fetch=FetchType.LAZY)
 	private List<Transaction> transactions = new ArrayList<>();
 	
+	// 연관 관계 객체 참조 추가는 언제 해야 하는가?
 	@ManyToMany(fetch=FetchType.LAZY)
 	@JoinTable(name="member_roles",
 			joinColumns=@JoinColumn(name="member_id"),
