@@ -19,15 +19,15 @@ public class TransactionModelAssembler implements RepresentationModelAssembler<T
 	public EntityModel<TransactionInfo> toModel(TransactionInfo transactionInfo) {
 		TransactionFilter transactionFilter = new TransactionFilter();
 		EntityModel<TransactionInfo> entityModel =  EntityModel.of(transactionInfo, 
-				linkTo(methodOn(TransactionController.class).search(transactionFilter)).withRel("transactions"));
+				linkTo(methodOn(TransactionController.class).search(transactionFilter, null)).withRel("transactions"));
 		
 		if(transactionInfo.getTransactionStatus() != TransactionStatus.CANCELED) {
-			entityModel.add(linkTo(methodOn(TransactionController.class).getTransaction(transactionInfo.getTransactionId())).withSelfRel());
+			entityModel.add(linkTo(methodOn(TransactionController.class).getTransaction(transactionInfo.getTransactionId(), null)).withSelfRel());
 		}
 		
 		if(transactionInfo.getTransactionStatus() == TransactionStatus.IN_PROCESS) {
-			entityModel.add(linkTo(methodOn(TransactionController.class).complete(transactionInfo.getTransactionId())).withRel("complete"));
-			entityModel.add(linkTo(methodOn(TransactionController.class).cancel(transactionInfo.getTransactionId())).withRel("cancel"));
+			entityModel.add(linkTo(methodOn(TransactionController.class).complete(transactionInfo.getTransactionId(), null)).withRel("complete"));
+			entityModel.add(linkTo(methodOn(TransactionController.class).cancel(transactionInfo.getTransactionId(), null)).withRel("cancel"));
 		}
 		
 		return entityModel;

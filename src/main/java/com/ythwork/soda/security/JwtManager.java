@@ -30,7 +30,6 @@ public class JwtManager {
 		Member member = (Member)authentication.getPrincipal();
 		return Jwts.builder()
 				.setSubject(member.getAuth().getUsername())
-				.claim("memberId", member.getId())
 				.setIssuedAt(new Date())
 				.setExpiration(new Date((new Date()).getTime() + expiration))
 				.signWith(SignatureAlgorithm.HS512, secretKey)
@@ -74,6 +73,8 @@ public class JwtManager {
 			throw new JwtAuthenticationException("지원하지 않는 JWT입니다.");
 		} catch(SignatureException e) {
 			throw new JwtAuthenticationException("JWT 서명이 잘못되었습니다.");
+		} catch(RuntimeException e) {
+			throw new JwtAuthenticationException("알 수 없는 에러가 발생했습니다.");
 		}
 	}
 	

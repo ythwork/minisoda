@@ -81,6 +81,15 @@ public class AccountService {
 				account.getId());
 	}
 	
+	public Account findById(Long id) {
+		Optional<Account> optAccount = accountRepo.findById(id);
+		if(optAccount.isPresent()) {
+			return optAccount.get();
+		} else {
+			throw new EntityNotFoundException("계좌 정보가 아직 등록되어 있지 않습니다.");
+		}
+	}
+	
 	public AccountInfo getAccountInfo(Long id) {
 		Optional<Account> optAccount = accountRepo.findById(id);
 		Account account = null;
@@ -98,11 +107,21 @@ public class AccountService {
 		return allAccounts.stream().map(this::fromAccountToAccountInfo).collect(Collectors.toList());
 	}
 	
+	public List<AccountInfo> getAllAccountInfosByMember(Member member) {
+		List<Account> allAccountsByMember = accountRepo.findByMember(member);
+		return allAccountsByMember.stream().map(this::fromAccountToAccountInfo).collect(Collectors.toList());
+	}
+	
 	public void deleteAccount(Long id) {
 		accountRepo.deleteById(id);
 	}
 	
 	public void deleteAll() {
 		accountRepo.deleteAll();
+	}
+	
+	public void deleteAllByMember(Member member) {
+		List<Account> allAccountsByMember = accountRepo.findByMember(member);
+		accountRepo.deleteAll(allAccountsByMember);
 	}
 }

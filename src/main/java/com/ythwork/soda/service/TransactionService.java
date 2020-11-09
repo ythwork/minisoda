@@ -27,6 +27,7 @@ import com.ythwork.soda.domain.TransactionStatus;
 import com.ythwork.soda.dto.TransactionAddInfo;
 import com.ythwork.soda.dto.TransactionInfo;
 import com.ythwork.soda.exception.EntityNotFoundException;
+import com.ythwork.soda.exception.NotAllowedMemberException;
 import com.ythwork.soda.exception.NotEnoughBalanceException;
 
 @Service
@@ -45,8 +46,12 @@ public class TransactionService {
 	@Autowired
 	private TransactionRepository transactionRepo;
 	
-	public TransactionInfo createTransaction(TransactionAddInfo transactionAddInfo) {
+	public TransactionInfo createTransaction(TransactionAddInfo transactionAddInfo, Member member) {
 		Long memberId = transactionAddInfo.getMemberId();
+		if(memberId != member.getId()) {
+			throw new NotAllowedMemberException("회원의 계좌로만 거래 내역을 만들 수 있습니다.");
+		}
+		
 		Long sendAcntId = transactionAddInfo.getSendAcntId();
 		String recvcode = transactionAddInfo.getRecvcode();
 		String recvAcntNum = transactionAddInfo.getRecvAcntNum();
@@ -54,7 +59,6 @@ public class TransactionService {
 		
 		Transaction transaction = new Transaction();
 		
-		Member member = memberService.findById(memberId);
 		Openapi send = accountService.findOpenapiByAccountId(sendAcntId);
 		Openapi recv = openapiService.findOpenapi(recvcode, recvAcntNum);
 				
@@ -130,16 +134,11 @@ public class TransactionService {
 		transactionRepo.deleteById(transactionId);
 	}
 	
-	public List<TransactionInfo> search(TransactionFilter filter) {
-		Long memberId = filter.getMemberId();
+	public List<TransactionInfo> search(TransactionFilter filter, Member member) {
 		Long sendAcntId = filter.getSendAcntId();
 		String fromString = filter.getFrom();
 		String toString = filter.getTo();
 		TransactionStatus status = filter.getStatus();
-		
-		Member member = null;
-		if(memberId != null) 
-			member = memberService.findById(memberId);
 
 		Openapi send = null;
 		if(sendAcntId != null)

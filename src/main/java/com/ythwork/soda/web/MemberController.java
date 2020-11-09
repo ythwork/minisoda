@@ -9,6 +9,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ythwork.soda.domain.Member;
 import com.ythwork.soda.dto.LoginRequest;
 import com.ythwork.soda.dto.LoginResponse;
 import com.ythwork.soda.dto.MemberAddInfo;
@@ -99,15 +101,15 @@ public class MemberController {
 	}
 	
 	@GetMapping("/{id}")
-	public EntityModel<MemberInfo> getMember(@PathVariable Long id, HttpServletRequest request) {
+	public EntityModel<MemberInfo> getMember(@PathVariable Long id, @AuthenticationPrincipal Member member) {
 		MemberInfo memberInfo = null;
 		try {
 			memberInfo = memberService.getMemberInfoById(id);
 		} catch(EntityNotFoundException e) {
 			throw new MemberNotFoundException(e.getMessage(), e);
 		}
-		Long jwtMemberId = jwtManager.getMemberId(request);
-		if( jwtMemberId != memberInfo.getMemberId()) {
+
+		if( member.getId() != memberInfo.getMemberId()) {
 			throw new NotAllowedMemberException("멤버 자신의 정보에만 접근이 가능합니다.");
 		}
 		
@@ -115,9 +117,8 @@ public class MemberController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteMember(@PathVariable Long id, HttpServletRequest request) {
-		Long jwtMemberId = jwtManager.getMemberId(request);
-		if( jwtMemberId != id) {
+	public ResponseEntity<?> deleteMember(@PathVariable Long id, @AuthenticationPrincipal Member member) {
+		if( member.getId() != id) {
 			throw new NotAllowedMemberException("멤버 자신의 정보에만 접근이 가능합니다.");
 		}
 		
