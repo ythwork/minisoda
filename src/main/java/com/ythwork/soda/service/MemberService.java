@@ -52,7 +52,6 @@ public class MemberService {
 		Auth auth = new Auth();
 		auth.setUsername(memberAddInfo.getUsername());
 		auth.setPassword(passwordEncoder.encode(memberAddInfo.getPassword()));
-		member.setAuth(auth);
 		
 		Set<String> roleStr = memberAddInfo.getRoles();
 		Set<Role> roles = new HashSet<>();
@@ -71,8 +70,9 @@ public class MemberService {
 					roles.add(userRole);
 				}
 			});
-		}
-		member.setRoles(roles);
+		}	
+		auth.setRoles(roles);
+		member.setAuth(auth);
 		
 		if(alreadyMemberByUsername(member) || alreadyMemberByEmail(member)) {
 			throw new EntityAlreadyExistsException(member.getLastName() + member.getFirstName() + " 님은 이미 가입한 회원입니다.");

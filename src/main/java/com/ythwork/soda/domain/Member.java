@@ -1,10 +1,9 @@
 package com.ythwork.soda.domain;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -13,13 +12,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.Getter;
@@ -61,22 +58,17 @@ public class Member implements UserDetails {
 	private String email;
 	
 	// mappedBy는 매핑 클래스의 필드 이름
-	@OneToMany(mappedBy = "member", fetch=FetchType.LAZY)
-	private List<Account> accounts = new ArrayList<>();
+	@OneToMany(mappedBy = "member", fetch=FetchType.EAGER)
+	private Set<Account> accounts = new HashSet<>();
 	
-	@OneToMany(mappedBy = "member", fetch=FetchType.LAZY)
-	private List<Transaction> transactions = new ArrayList<>();
-	
-	// 연관 관계 객체 참조 추가는 언제 해야 하는가?
-	@ManyToMany(fetch=FetchType.LAZY)
-	@JoinTable(name="member_role",
-			joinColumns=@JoinColumn(name="member_id"),
-			inverseJoinColumns=@JoinColumn(name="role_id"))
-	private Set<Role> roles = new HashSet<>();
+	@OneToMany(mappedBy = "member", fetch=FetchType.EAGER)
+	private Set<Transaction> transactions = new HashSet<>();
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return auth.getAuthorities();
+		return auth.getRoles().stream().map(role -> {
+			return new SimpleGrantedAuthority(role.toString());
+		}).collect(Collectors.toList());
 	}
 
 	@Override
