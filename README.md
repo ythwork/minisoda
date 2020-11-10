@@ -160,82 +160,21 @@
     
 ### 계좌 조회
   - request
-    - 
+    - curl -v localhost:8080/account/14 -H 'Content-type:application/json' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4NDI4NSwiZXhwIjoxNjA0OTg0ODg1fQ.Z2nuJiMgT2OWOfEuEIkjXaihrB5rO9FFRy6IOL6y_llPrCF7WijrvVyn2bdMcFMDURP0Y7x7RXObD5ezKz05IA'
   - response
-    - 
+    - {"owner":"장영실","bankcode":"B BANK","accountNumber":"222-33-4321","balance":36000,"accountId":14,"_links":{"self":{"href":"http://localhost:8080/account/14"},"accounts":{"href":"http://localhost:8080/account"}}}
     
-### 계좌 목록 조회
+### 계좌 목록 조회 - 본인의 계좌 정보만 조회 가능
   - request
-    - curl -v localhost:8080/account | json_pp
+    - curl -v localhost:8080/account -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dGh3b3JrIiwiaWF0IjoxNjA0OTg0NzEwLCJleHAiOjE2MDQ5ODUzMTB9.VsXwCXNbCI-kErfcOXb4gjhySuIB20GwqhfTR2XAbLCUH9f9rQx9OILX-4Pk05_gmPuXVLKoLek2ClBrQVwEtQ'
   - response
-    - {
-   "_embedded" : {
-      "accountInfoList" : [
-         {
-            "accountId" : 1,
-            "_links" : {
-               "accounts" : {
-                  "href" : "http://localhost:8080/account"
-               },
-               "self" : {
-                  "href" : "http://localhost:8080/account/1"
-               }
-            },
-            "balance" : 50000,
-            "owner" : "양태환",
-            "accountNumber" : "123-45-6789",
-            "bankcode" : "A BANK"
-         },
-         {
-            "_links" : {
-               "accounts" : {
-                  "href" : "http://localhost:8080/account"
-               },
-               "self" : {
-                  "href" : "http://localhost:8080/account/2"
-               }
-            },
-            "accountId" : 2,
-            "owner" : "양태환",
-            "balance" : 20000,
-            "bankcode" : "B BANK",
-            "accountNumber" : "111-22-3333"
-         },
-         {
-            "_links" : {
-               "self" : {
-                  "href" : "http://localhost:8080/account/3"
-               },
-               "accounts" : {
-                  "href" : "http://localhost:8080/account"
-               }
-            },
-            "accountId" : 3,
-            "bankcode" : "C BANK",
-            "accountNumber" : "222-33-4321",
-            "owner" : "양태환",
-            "balance" : 10000
-         }
-      ]
-   },
-   "_links" : {
-      "self" : {
-         "href" : "http://localhost:8080/account"
-      }
-   }
-}
-
-### 계좌 삭제
-  - request
-    - curl -vX DELETE localhost:8080/account/3
-  - response
-    - HTTP/1.1 204
+    - {"_embedded":{"accountInfoList":[{"owner":"양태환","bankcode":"A BANK","accountNumber":"123-45-6789","balance":45000,"accountId":8,"_links":{"self":{"href":"http://localhost:8080/account/8"},"accounts":{"href":"http://localhost:8080/account"}}},{"owner":"양태환","bankcode":"B BANK","accountNumber":"111-22-3333","balance":19500,"accountId":9,"_links":{"self":{"href":"http://localhost:8080/account/9"},"accounts":{"href":"http://localhost:8080/account"}}},{"owner":"양태환","bankcode":"C BANK","accountNumber":"222-33-4321","balance":10000,"accountId":10,"_links":{"self":{"href":"http://localhost:8080/account/10"},"accounts":{"href":"http://localhost:8080/account"}}}]},"_links":{"self":{"href":"http://localhost:8080/account"}}}
  
 ### 거래 내역 생성
   - request
-    - curl -vX POST localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "11", "sendAcntId" : "1", "recvcode" : "A BANK", "recvAcntNum" : "333-44-1234", "amount" : "5000"}'
+    - curl -vX POST localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "31", "sendAcntId" : "14", "recvcode" : "A BANK", "recvAcntNum" : "123-45-6789", "amount" : "35000"}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4NTExMywiZXhwIjoxNjA0OTg1NzEzfQ.WLu49igG_xoBCEQLieSw8Mt_kaUJBuxUmXCf-t3Vh_Uw7B1KmW_4Tr4vr4y9lp_yepLkXwp99DUsuPLK17bL9Q'
   - response
-    - {"memberId":11,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"A BANK","recvAcntNum":"333-44-1234","amount":5000,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-02T11:16:23.568+00:00","transactionId":9,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/9"},"complete":{"href":"http://localhost:8080/transaction/9/complete"},"cancel":{"href":"http://localhost:8080/transaction/9/cancel"}}}
+    - {"memberId":31,"sendcode":"B BANK","sendAcntNum":"222-33-4321","recvcode":"A BANK","recvAcntNum":"123-45-6789","amount":35000,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-10T05:12:25.168+00:00","transactionId":22,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/22"},"complete":{"href":"http://localhost:8080/transaction/22/complete"},"cancel":{"href":"http://localhost:8080/transaction/22/cancel"}}}
     
 ### 거래 내역 검색 - Case 1.  거래내역 상태가 IN_PROCESS일 때 
   - request
