@@ -52,6 +52,17 @@
       - 이번 프로젝트의 경우 비관적 락을 사용해볼까 하고 고민하다가 실제 로직을 살펴보니 송금할 때 여러 로우를 탐색하지 않고 openapi에서 두 개의 계좌 정보만 가져오기 때문에 UPDATE를 사용해도 불필요하게 잠기는 로우는 생기지 않을 것으로 판단해 JPA의 dirty checking 기능을 그대로 사용하기로 했습니다. dirty checking은 1차 캐시에 있는 스냅샷을 이용해 트랜잭션을 커밋할 때 update query를 만들어 동기화 하는 기법입니다.
 ---
 
+## 로그인
+  com.ythwork.soda.security
+  - 고려사항
+    1. AuthenticationTokenFilter는 인증에 사용할 필터입니다. 클라이언트가 요청을 보내면 'Authorization: Bearer [JWT-TOKEN]' 헤더가 있습니다. jwtManager로 먼저 인증(Authentication)을 하고 인증을 통과하면 Member 객체를 Authentication 객체에 담아둡니다.이후에 컨트롤러 메서드에서 @AuthenticationPrincipal 애너테이션으로 받아서 사용합니다. 
+    2. Spring Security를 사용하기 위해서는 UserDetails와 UserDetailsService를 구현해야 합니다. Member 객체에 Auth 객체를 참조할 auth 필드를 두고 UserDetails 인터페이스를 구현합니다. Auth 객체는 username과 password 그리고 roles 를 가지고 있습니다. roles는 이후에 SimpleGrantedAuthority 객체로 변환해 authorities로 반환됩니다.
+    3. JwtManager는 jjwt를 이용해 구현했습니다. jwt 토큰을 생성 및 인증하는 기능을 제공합니다. 클라이언트가 로그인을 요청하면 MemberController가 jwtManager를 통해 토큰을 발급합니다. 이 토큰이 JWT(JSON web token)입니다. JWT은 header.payload.signature로 구성된 토큰입니다. payload에는 키와 값으로 구성된 claim을 넣을 수 있습니다. 어떤 데이터는 상관없이 넣을 수 있습니다. 이는 매우 유용하지만 보안상의 약점이 될지도 모르겠습니다. 이후 클라이언트는 로그인 상태가 필요한 엔드포인트에 접속할 때마다 Authorization 헤더에 JWT 값을 추가해 요청해야 합니다. 
+    4. 클라이언트가 요청한 리퀘스트는 필터 체인을 거치게 되는데 이때 UserPasswordAuthenticationFilter 전에 AuthenticationTokenFilter를 설치해 인증을 완료합니다. 이때 SecurityContextHolder 에 있는 컨텍스트에 Authentication 객체를 만들어 넣어둡니다. 이렇게 하면 애플리케이션 전체에서 SecurityContextHolder.getContext().getAuthentication()을 통해 Authentication 객체를 받아올 수 있습니다. 
+    5. SecurityConfiguration은 스프링 시큐리티를 사용하기 위한 설정입니다. 가장 중요한 점은 configure(WebSecurity)와 configure(HttpSecurity)를 오버라이딩하는 것입니다. "member/login"이나 "member/register" 같은 경우 인증을 거치지 않아도 모든 사용자가 접속 가능해야 합니다. 많이 오해하는 부분이 이렇게 모든 사용자가 접속해야 하는 엔드 포인트들에 대해 HttpSecurity를 설정할 때 http.authorizeRequests().antMatchers(...).permitAll()을 하면 AuthenticationTokenFilter가 비활성화되어 작동하지 않을 것이라는 생각입니다. 하지만 AuthenticationTokenFilter는 인증 필터이고 permitAll()은 인증된 사용자들에게 모든 권한을 주겠다는 것으로 권한 부여(authorization)에 대한 기능을 제공하지 인증(authentication)과는 전혀 상관없습니다. 그러므로 인증 필터를 사용하지 않기 위해서는 WebSecurity를 설정하면서 web.ignoring().antMachers()를 사용해야 합니다. 처음에 이 부분을 간과하여 모든 요청에 대해 인증 필터를 거치고 JWT가 없다는 익셉션에 발생하여 해결하느라 애를 먹었습니다.
+
+---
+
 ## 도메인
   com.ythwork.soda.domain
   - 고려사항
