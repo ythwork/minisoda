@@ -153,16 +153,16 @@
     
 ### 계좌 등록
   - request
-    - curl -vX POST localhost:8080/account -H 'Content-type:application/json' -d '{"memberId" : "11", "code" : "A BANK", "accountNumber" : "123-45-6789"}'
+    - curl -vX POST localhost:8080/account -H 'Content-type:application/json' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4NDI4NSwiZXhwIjoxNjA0OTg0ODg1fQ.Z2nuJiMgT2OWOfEuEIkjXaihrB5rO9FFRy6IOL6y_llPrCF7WijrvVyn2bdMcFMDURP0Y7x7RXObD5ezKz05IA' -d '{"memberId" : "31", "code" : "B BANK", "accountNumber" : "222-33-4321"}'
   - response
-    - Location: http://localhost:8080/account/1
-    - {"owner":"양태환","bankcode":"A BANK","accountNumber":"123-45-6789","balance":50000,"accountId":1,"_links":{"self":{"href":"http://localhost:8080/account/1"},"accounts":{"href":"http://localhost:8080/account"}}}
+    - Location: http://localhost:8080/account/14
+    - {"owner":"장영실","bankcode":"B BANK","accountNumber":"222-33-4321","balance":36000,"accountId":14,"_links":{"self":{"href":"http://localhost:8080/account/14"},"accounts":{"href":"http://localhost:8080/account"}}}
     
 ### 계좌 조회
   - request
-    - curl -v localhost:8080/account/1
+    - 
   - response
-    - {"owner":"양태환","bankcode":"A BANK","accountNumber":"123-45-6789","balance":50000,"accountId":1,"_links":{"self":{"href":"http://localhost:8080/account/1"},"accounts":{"href":"http://localhost:8080/account"}}}
+    - 
     
 ### 계좌 목록 조회
   - request
