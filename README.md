@@ -184,112 +184,27 @@
     
 ### 거래 내역 검색 - Case 2.  거래 내역 상태가 SUCCEEDED일 때
   - request
-    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "SUCCEEDED", "amount" : ""}' | json_pp
+    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "SUCCEEDED", "amount" : ""}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdW5zaW4iLCJpYXQiOjE2MDQ5ODU1MzksImV4cCI6MTYwNDk4NjEzOX0.uCOkSRdnu1SB7vyjist2sZbWbCTvovNsmKHoViSVLt5baWhSgNo1OL7EgEcXJf5__niGFtT82ndUTvLMHMGzPw'
   - response
-    - {
-   "_links" : {
-      "self" : {
-         "href" : "http://localhost:8080/transaction"
-      }
-   },
-   "_embedded" : {
-      "transactionInfoList" : [
-         {
-            "processAt" : "2020-11-02T11:19:41.000+00:00",
-            "transactionId" : 10,
-            "transactionStatus" : "SUCCEEDED",
-            "_links" : {
-               "self" : {
-                  "href" : "http://localhost:8080/transaction/10"
-               },
-               "transactions" : {
-                  "href" : "http://localhost:8080/transaction"
-               }
-            },
-            "recvAcntNum" : "222-33-4321",
-            "amount" : 500,
-            "memberId" : 11,
-            "afterBalance" : 19500,
-            "recvcode" : "B BANK",
-            "sendcode" : "B BANK",
-            "sendAcntNum" : "111-22-3333"
-         }
-      ]
-   }
-}
+    - {"_embedded":{"transactionInfoList":[{"memberId":30,"sendcode":"A BANK","sendAcntNum":"333-44-1234","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":30000,"afterBalance":0,"transactionStatus":"SUCCEEDED","processAt":"2020-11-09T13:51:27.000+00:00","transactionId":19,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/19"}}}]},"_links":{"self":{"href":"http://localhost:8080/transaction"}}}
 
 ### 거래 내역 검색 - Case 3. 거래 내역 상태가 FAILED 일 때
   - request
-    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "FAILED", "amount" : ""}' | json_pp
+    - 
   - response
-    - {
-   "_links" : {
-      "self" : {
-         "href" : "http://localhost:8080/transaction"
-      }
-   },
-   "_embedded" : {
-      "transactionInfoList" : [
-         {
-            "memberId" : 11,
-            "_links" : {
-               "transactions" : {
-                  "href" : "http://localhost:8080/transaction"
-               },
-               "self" : {
-                  "href" : "http://localhost:8080/transaction/13"
-               }
-            },
-            "processAt" : "2020-11-02T14:22:00.000+00:00",
-            "afterBalance" : -20000,
-            "transactionId" : 13,
-            "amount" : 70000,
-            "sendAcntNum" : "123-45-6789",
-            "transactionStatus" : "FAILED",
-            "sendcode" : "A BANK",
-            "recvcode" : "B BANK",
-            "recvAcntNum" : "111-22-3333"
-         }
-      ]
-   }
-}
+    - 
 
 ### 거래 내역 1건 조회
   - request
-    - curl -v localhost:8080/transaction/9 | json_pp
+    - curl -v localhost:8080/transaction/22 -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4NTgxOSwiZXhwIjoxNjA0OTg2NDE5fQ.yi1gzlD35bvkag90oExPrx2IdbtOLUb27e4TIbqhKhoUXE6li4SobudGVVJnCLb8cvr34Sq3CSA_e_hIvm8xBA'
   - response
-    - {
-   "recvAcntNum" : "333-44-1234",
-   "memberId" : 11,
-   "amount" : 5000,
-   "transactionId" : 9,
-   "afterBalance" : 0,
-   "transactionStatus" : "IN_PROCESS",
-   "sendcode" : "A BANK",
-   "sendAcntNum" : "123-45-6789",
-   "_links" : {
-      "complete" : {
-         "href" : "http://localhost:8080/transaction/9/complete"
-      },
-      "transactions" : {
-         "href" : "http://localhost:8080/transaction"
-      },
-      "self" : {
-         "href" : "http://localhost:8080/transaction/9"
-      },
-      "cancel" : {
-         "href" : "http://localhost:8080/transaction/9/cancel"
-      }
-   },
-   "processAt" : "2020-11-02T11:16:23.000+00:00",
-   "recvcode" : "A BANK"
-}
+    - {"memberId":31,"sendcode":"B BANK","sendAcntNum":"222-33-4321","recvcode":"A BANK","recvAcntNum":"123-45-6789","amount":35000,"afterBalance":0,"transactionStatus":"IN_PROCESS","processAt":"2020-11-10T05:12:25.000+00:00","transactionId":22,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/22"},"complete":{"href":"http://localhost:8080/transaction/22/complete"},"cancel":{"href":"http://localhost:8080/transaction/22/cancel"}}}
 
 ### 송금 완료
   - request
-    - curl -vX PUT localhost:8080/transaction/10/complete
+    - curl -vX PUT localhost:8080/transaction/22/complete -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4NTgxOSwiZXhwIjoxNjA0OTg2NDE5fQ.yi1gzlD35bvkag90oExPrx2IdbtOLUb27e4TIbqhKhoUXE6li4SobudGVVJnCLb8cvr34Sq3CSA_e_hIvm8xBA'
   - response
-    - {"memberId":11,"sendcode":"B BANK","sendAcntNum":"111-22-3333","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":500,"afterBalance":19500,"transactionStatus":"SUCCEEDED","processAt":"2020-11-02T11:19:41.000+00:00","transactionId":10,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/10"}}}
+    - {"memberId":31,"sendcode":"B BANK","sendAcntNum":"222-33-4321","recvcode":"A BANK","recvAcntNum":"123-45-6789","amount":35000,"afterBalance":1000,"transactionStatus":"SUCCEEDED","processAt":"2020-11-10T05:12:25.000+00:00","transactionId":22,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/22"}}}
     
 ### 송금 취소
   - request
