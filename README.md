@@ -113,39 +113,41 @@
   실제 작동 여부를 curl을 통해 확인해보았습니다. 아래는 몇가지 결과를 정리한 것입니다. 
 ### 회원 등록
   - request
-    - curl -vX POST localhost:8080/member/register -H 'Content-type:application/json' -d '{"firstName" : "영실", "lastName" : "장", "address" : {"country" : "대한민국", "province" : "경기도", "city" : "한양시", "street" : "동대문길", "houseNumber" : "123"}, "phoneNumber" : "01022223333", "email" : "youngsil@gmail.com"}
+    - curl -vX POST localhost:8080/member/register  -H 'Content-type:application/json' -d '{"firstName" : "영실", "lastName" : "장", "address" : {"country" : "대한민국", "province" : "경기도", "city" : "한양시", "street" : "도성로", "houseNumber" : "123"}, "phoneNumber" : "0101112223", "email" : "youhgsil@gmail.com", "username" : "youngsil", "password" : "secret", "roles" : ["USER"]}'
   - response
     - HTTP/1.1 201
-    - Location: http://localhost:8080/member/15
-    - {"fullName":"장영실","address":{"country":"대한민국","province":"경기도","city":"한양시","street":"동대문길","houseNumber":"123"},"phoneNumber":"01022223333","email":"youngsil@gmail.com","memberId":15,"_links":{"self":{"href":"http://localhost:8080/member/15"}}}
-  
-### 회원 조회
+    - Location: http://localhost:8080/member/login
+    - {"fullName":"장영실","address":{"country":"대한민국","province":"경기도","city":"한양시","street":"도성로","houseNumber":"123"},"phoneNumber":"0101112223","email":"youhgsil@gmail.com","memberId":31,"_links":{"self":{"href":"http://localhost:8080/member/31"}}}
+ 
+### 로그인
   - request
-    - curl -v localhost:8080/member/15 | json_pp
+    - curl -vX POST localhost:8080/member/login -H 'Content-type:application/json' -d '{"username" : "youngsil", "password" : "secret"}'
   - response
-    - HTTP/1.1 200
-    - {
-   "phoneNumber" : "01022223333",
-   "memberId" : 15,
-   "email" : "youngsil@gmail.com",
-   "address" : {
-      "street" : "동대문길",
-      "country" : "대한민국",
-      "province" : "경기도",
-      "city" : "한양시",
-      "houseNumber" : "123"
-   },
-   "_links" : {
-      "self" : {
-         "href" : "http://localhost:8080/member/15"
-      }
-   },
-   "fullName" : "장영실"
-}
+    - {"jwt":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4MzAyOCwiZXhwIjoxNjA0OTgzNjI4fQ.Bx7xmSlkGMqqKIjLZDd35u6YGBkjzqB8ta3JB0T0yhA6t7N-zmZ9ICLbWlYVxnyLrT0rd3-A4AYwW0BhY6hmhw","memberInfo":{"fullName":"장영실","address":{"country":"대한민국","province":"경기도","city":"한양시","street":"도성로","houseNumber":"123"},"phoneNumber":"0101112223","email":"youhgsil@gmail.com","memberId":31},"_links":{"member":{"href":"http://localhost:8080/member/31"}}}
+ 
+### 회원 조회 - case 1. 토큰 없이 본인 조회 -> 권한이 없으므로 에러 
+  - request
+    - curl -v localhost:8080/member/31
+  - response
+    - HTTP/1.1 403
+    - {"timestamp":"2020-11-10T04:38:40.994+00:00","status":403,"error":"Forbidden","message":"","path":"/member/31"}
+
+### 회원 조회 - case 2. 헤더에 토큰 포함 본인 조회 -> OK 
+  - request
+    - curl -v localhost:8080/member/31 -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4MzAyOCwiZXhwIjoxNjA0OTgzNjI4fQ.Bx7xmSlkGMqqKIjLZDd35u6YGBkjzqB8ta3JB0T0yhA6t7N-zmZ9ICLbWlYVxnyLrT0rd3-A4AYwW0BhY6hmhw'
+  - response
+    - {"fullName":"장영실","address":{"country":"대한민국","province":"경기도","city":"한양시","street":"도성로","houseNumber":"123"},"phoneNumber":"0101112223","email":"youhgsil@gmail.com","memberId":31,"_links":{"self":{"href":"http://localhost:8080/member/31"}}}
+
+### 회원 조회 - case 3. 다른 회원 조회 ->  에러
+  - request
+    - curl -v localhost:8080/member/27 -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4MzAyOCwiZXhwIjoxNjA0OTgzNjI4fQ.Bx7xmSlkGMqqKIjLZDd35u6YGBkjzqB8ta3JB0T0yhA6t7N-zmZ9ICLbWlYVxnyLrT0rd3-A4AYwW0BhY6hmhw'
+  - response
+    - HTTP/1.1 405
+    - 멤버 자신의 정보에만 접근이 가능합니다.
 
 ### 회원 탈퇴
   - request
-    - curl -vX DELETE localhost:8080/member/15 | json_pp
+    - curl -vX DELETE localhost:8080/member/32 -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJvYmFtYSIsImlhdCI6MTYwNDk4MzU5NCwiZXhwIjoxNjA0OTg0MTk0fQ.1eN4thydR1JDviJ2oMZU0jWubuB95PvPvtHS5mTdME3mz_ObCPMUACKE2n6gRx-CtLz4weK63uy-1ecGhjT80A'
   - response
     - HTTP/1.1 204
     
