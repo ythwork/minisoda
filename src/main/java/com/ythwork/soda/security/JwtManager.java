@@ -36,19 +36,6 @@ public class JwtManager {
 				.compact();
 	}
 	
-	private Long getMemberId(String token) {
-		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("memberId", Long.class);
-	}
-	
-	public Long getMemberId(HttpServletRequest request) {
-		String jwt = getJwtFromRequestHeader(request);
-		if(jwt==null) {
-			throw new JwtAuthenticationException("요청 헤더에 JWT가 없습니다.");
-		}
-		
-		return getMemberId(jwt);
-	}
-	
 	private String getUsername(String token) {
 		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
 	}
