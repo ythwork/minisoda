@@ -190,9 +190,9 @@
 
 ### 거래 내역 검색 - Case 3. 거래 내역 상태가 FAILED 일 때
   - request
-    - 
+    - curl -vX GET localhost:8080/transaction -H 'Content-type:application/json' -d '{"memberId" : "", "sendAcntId" : "", "from" : "", "to" : "", "status" : "FAILED", "amount" : ""}' -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5b3VuZ3NpbCIsImlhdCI6MTYwNDk4Njg5MiwiZXhwIjoxNjA0OTg3NDkyfQ.jgFi1UYPCc4rxUs_X5xsnx9HXnC5l3pET9JdKIrQhcdw3OdV8gTZNru-fXNXBy2sa_4isvv7XuNDmHC45PpyKw'
   - response
-    - 
+    - {"_embedded":{"transactionInfoList":[{"memberId":31,"sendcode":"B BANK","sendAcntNum":"222-33-4321","recvcode":"B BANK","recvAcntNum":"111-22-3333","amount":6000,"afterBalance":-5000,"transactionStatus":"FAILED","processAt":"2020-11-10T05:45:29.000+00:00","transactionId":26,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/26"}}}]},"_links":{"self":{"href":"http://localhost:8080/transaction"}}}
 
 ### 거래 내역 1건 조회
   - request
@@ -208,15 +208,15 @@
     
 ### 송금 취소
   - request
-    - curl -vX DELETE localhost:8080/transaction/11/cancel
+    - curl -vX DELETE localhost:8080/transaction/24/cancel -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dGh3b3JrIiwiaWF0IjoxNjA0OTg2NDQyLCJleHAiOjE2MDQ5ODcwNDJ9.hxlPYdPp3wUF3hBpoBKD-wiBJkKd0tGDr4H7QtP84jdhwLGZY5klxUfiLKqe2zA3BvVdhoI823DHqrdKs_ZGmg'
   - response
-    - {"memberId":12,"sendcode":"A BANK","sendAcntNum":"333-44-1234","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":7000,"afterBalance":0,"transactionStatus":"CANCELED","processAt":"2020-11-02T11:25:24.000+00:00","transactionId":11,"_links":{"transactions":{"href":"http://localhost:8080/transaction"}}}
+    - {"memberId":27,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":200000,"afterBalance":0,"transactionStatus":"CANCELED","processAt":"2020-11-10T05:35:58.000+00:00","transactionId":24,"_links":{"transactions":{"href":"http://localhost:8080/transaction"}}}
     
 ### 송금 실패
   - request
-    - curl -vX PUT localhost:8080/transaction/13/complete
+    - curl -vX PUT localhost:8080/transaction/25/complete -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ5dGh3b3JrIiwiaWF0IjoxNjA0OTg2NDQyLCJleHAiOjE2MDQ5ODcwNDJ9.hxlPYdPp3wUF3hBpoBKD-wiBJkKd0tGDr4H7QtP84jdhwLGZY5klxUfiLKqe2zA3BvVdhoI823DHqrdKs_ZGmg'
   - response
-    - {"memberId":11,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"B BANK","recvAcntNum":"111-22-3333","amount":70000,"afterBalance":-20000,"transactionStatus":"FAILED","processAt":"2020-11-02T14:22:00.000+00:00","transactionId":13,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/13"}}}
+    - {"memberId":27,"sendcode":"A BANK","sendAcntNum":"123-45-6789","recvcode":"B BANK","recvAcntNum":"222-33-4321","amount":200000,"afterBalance":-120000,"transactionStatus":"FAILED","processAt":"2020-11-10T05:38:08.000+00:00","transactionId":25,"_links":{"transactions":{"href":"http://localhost:8080/transaction"},"self":{"href":"http://localhost:8080/transaction/25"}}}
 ---
 
 
